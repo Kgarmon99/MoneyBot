@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyBot Financial Mastery Journey</title>
+    <link rel="stylesheet" href="pathways.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/ScrollTrigger.min.js"></script>
+    <style>
+        /* Add any modal styling here for better visibility */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+
+        .xp-bar {
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            height: 20px;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        #xp-progress {
+            background-color: #00ff99; /* Your accent color */
+            height: 100%;
+            width: 0%; /* Start with 0% width */
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-title">
+            <img src="images/MoneybotLogo.png" alt="MoneyBot Logo" class="logo">
+            <h1>MoneyBot Mastery</h1>
+        </div>
+        <div class="progress">
+            <div class="level">
+                <span class="icon-coin">🪙</span>
+                <span id="current-level">1</span>
+            </div>
+            <div class="xp-bar">
+                <div id="xp-progress"></div>
+            </div>
+        </div>
+    </header>
+
+    <main id="learning-path">
+        <!-- Sections and levels will be dynamically generated here -->
+    </main>
+
+    <nav>
+        <button class="nav-button" data-tooltip="Home">🏠</button>
+        <button class="nav-button" data-tooltip="Library">📚</button>
+        <button class="nav-button" data-tooltip="Tools">🛠️</button>
+        <button class="nav-button" data-tooltip="Chatbot">🤖</button>
+    </nav>
+
+    <div id="level-complete-modal" class="modal">
+        <div class="modal-content">
+            <h2>Level Complete!</h2>
+            <p>You've earned <span id="xp-earned">0</span> XP</p>
+            <button id="claim-reward">Claim Reward</button>
+        </div>
+    </div>
+
+    <div id="content-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-modal" style="cursor:pointer; float:right;">&times;</span>
+            <div id="modal-content">
+                <!-- Video content will be dynamically injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="pathways.js"></script>
+</body>
+</html>

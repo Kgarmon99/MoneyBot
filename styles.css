@@ -1,0 +1,787 @@
+/* Base styling */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container {
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 30px;
+  border-radius: 10px;
+  width: 400px;
+  box-shadow: 0px 0px 10px 0px #00ff99;
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.container:hover {
+  transform: translateY(-10px);
+  opacity: 0.9;
+}
+
+/* Logo styling */
+.logo {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 20px;
+  animation: coolLogo 2s ease infinite alternate;
+  border-radius: 50%;
+}
+
+@keyframes coolLogo {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 20px #00ff99, 0 0 40px #00ff99, 0 0 60px #00ff99;
+  }
+
+  100% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #00ff99, 0 0 60px #00ff99, 0 0 100px #00ff99;
+  }
+}
+
+/* Title styling */
+.app-title,
+.page-title {
+  color: #00ff99;
+  font-size: 24px;
+  margin-top: 10px;
+  animation: heartbeat 1.5s infinite;
+}
+
+@keyframes heartbeat {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Button styling */
+.animated-btn {
+  background-color: #00ff99;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.animated-btn:hover {
+  background-color: #00cc77;
+  transform: scale(1.05);
+}
+
+/* Input field styling */
+.input-field,
+.select-field {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  background-color: rgba(0, 0, 0, 0.4);
+  color: white;
+}
+
+.input-field::placeholder {
+  color: #ccc;
+}
+
+.input-field:focus {
+  outline: none;
+  box-shadow: 0px 0px 5px #00ff99;
+}
+
+/* Existing styles... */
+
+.welcome-section {
+  color: #00ff99;
+  margin: 20px;
+  text-align: center;
+}
+
+.dashboard {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  margin: 20px;
+}
+
+.dashboard-item {
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 10px;
+  box-shadow: 0 0 10px #00ff99, 0 0 20px #00ff99 inset;
+  /* Inset and outer glow */
+  padding: 20px;
+  margin: 10px;
+  width: 30%;
+  min-width: 250px;
+  color: #00ff99;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* Smooth transitions */
+  position: relative;
+  /* For pseudo-elements and hover effects */
+}
+
+.dashboard-item:hover {
+  transform: translateY(-5px);
+  /* Slight lift effect */
+  box-shadow: 0 0 15px #00ff99, 0 0 25px #00ff99 inset;
+  /* Enhanced glow effect */
+}
+
+.dashboard-item::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  z-index: -1;
+  background: linear-gradient(45deg, #00ff99, #009966, #004d33, #002619, #00ff99);
+  background-size: 400%;
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+
+.dashboard-item:hover::before {
+  opacity: 1;
+  /* Reveal the gradient border on hover */
+  animation: animateBorder 10s linear infinite;
+  /* Gradient animation */
+}
+
+@keyframes animateBorder {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
+/* Responsive styling for smaller screens */
+@media (max-width: 768px) {
+  .dashboard-item {
+    width: 45%;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-item {
+    width: 90%;
+  }
+}
+
+
+
+/* content page styles*/
+
+.content-section {
+  margin: 20px;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #00ff99;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #00ff99;
+  transition: padding 0.3s ease; /* Smooth transition for padding changes */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .content-section {
+      margin: 15px; /* Slightly smaller margin on medium screens */
+      padding: 12px; /* Reduced padding for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .content-section {
+      margin: 10px; /* Even smaller margin on small screens */
+      padding: 10px; /* Further reduced padding */
+      box-shadow: 0 0 8px #00ff99; /* Slightly less shadow for smaller screens */
+  }
+}
+
+
+.content-item {
+  margin-bottom: 20px;
+}
+
+
+
+/* Insights Section Styles */
+.insights-section {
+  background-color: rgba(0, 0, 0, 0.8);
+  margin: 20px auto;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #00ff99;
+  color: #00ff99;
+  text-align: center;
+  max-width: 800px;
+}
+
+.insights-section h1 {
+  margin-bottom: 30px;
+}
+
+/* Category Styles */
+.insight-category {
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.insight-category h2 {
+  color: #00ff99;
+  margin-bottom: 15px;
+}
+
+/* Item Styles */
+.insight-item {
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  color: #ccc;
+}
+
+.insight-item h3 {
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 768px) {
+  .insights-section {
+    width: 90%;
+  }
+}
+
+body {
+  background-color: black;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+#gameArea {
+  margin: auto;
+  padding: 20px;
+}
+
+iframe {
+  border: 3px solid #00ff99;
+  /* MoneyBot themed border */
+  border-radius: 10px;
+}
+
+.games-link {
+  display: inline-block;
+  background-color: black;
+  color: #00ff99;
+  padding: 10px 15px;
+  margin-top: 10px;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.games-link:hover {
+  background-color: black;
+  border-color: #00ff99;
+}
+
+  /* Bottom Navigation */
+  .bottom-navigation {
+      background-color: rgba(0, 255, 153, 0.2);
+      backdrop-filter: blur(10px);
+      width: 100%;
+      position: fixed;
+      bottom: 0;
+      display: flex;
+      justify-content: space-around;
+      padding: 15px 0;
+      z-index: 100;
+      border-top: 2px solid #00ff99;
+  }
+
+  .nav-box {
+      background-color: #333;
+      border: 2px solid #00ff99;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0, 255, 153, 0.3);
+      transition: all 0.3s ease;
+  }
+
+  .nav-box:hover {
+      box-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
+      transform: translateY(-5px);
+  }
+
+  .nav-box a {
+      color: #00ff99;
+      text-decoration: none;
+      font-weight: bold;
+  }
+
+.welcome-section {
+  width: 100%;
+  background-color: black;
+  /* Matches the body's background */
+  color: #00ff99;
+  padding: 20px 0;
+  box-shadow: 0 4px 8px rgba(0, 255, 153, 0.5);
+  text-align: center;
+}
+
+quote-of-the-day {
+  font-size: 20px;
+  font-weight: bold;
+  animation: ticker 10s linear infinite;
+}
+
+
+
+
+/* Ticker animation */
+@keyframes ticker {
+  0% {
+    transform: translateX(100%);
+    text-shadow: 0 0 10px #00ff99, 0 0 20px #00ff99, 0 0 30px #00ff99, 0 0 40px #00ff99, 0 0 50px #00ff99, 0 0 60px #00ff99, 0 0 70px #00ff99;
+  }
+
+  100% {
+    transform: translateX(-100%);
+    text-shadow: none;
+  }
+}
+
+/* Styling for the ticker container */
+.quote-ticker {
+  position: -webkit-sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  /* Adjust height as needed */
+  background-color: #000;
+  border-color: #00ff99;
+  color: #00ff99;
+  overflow: hidden;
+}
+
+/* Styling for the ticker text */
+.quote-ticker p {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+  animation: ticker 20s linear infinite;
+  /* Adjust duration and timing function as needed */
+}
+  /* Targets any <a> tags within .dashboard-item specifically */
+  .dashboard-item a {
+    text-decoration: none; /* This removes the underline */
+    color: inherit; /* Optionally ensures text color matches the surrounding text */
+  }
+
+  /* Alternatively, if you want to ensure this applies to .dashboard-item regardless of tag */
+  .dashboard-item, .dashboard-item:hover, .dashboard-item:visited {
+    text-decoration: none; /* Removes underline */
+    color: #00ff99; /* Adjust color as needed */
+  }
+/* Additional CSS for Daily $ Tips and overall layout */
+.daily-tip h2 {
+    color: #00ff99; /* Adjust to fit your color scheme */
+    margin: 10px 0; /* Spacing around the Daily $ Tips title */
+}
+
+.quote-ticker {
+    color: #fff; /* Ensures ticker text is readable */
+    font-style: italic; /* Optional style for the quote */
+    margin: 20px 0;
+}
+
+
+.user-input-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 200px;
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Additional styles for iframe */
+.user-input-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+.slider {
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+
+.slide {
+  min-width: 100%;
+  transition: transform 0.5s ease-in-out;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.meme-item {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.meme-image {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.meme-image:hover {
+  transform: scale(1.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.meme-image:active {
+  transform: scale(1.200);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+.meme-item.loaded {
+  opacity: 1; /* Fade in items when loaded */}
+
+.loading-indicator {
+    text-align: center;
+    padding: 10px;
+    font-size: 1.2em;
+    display: none; /* Initially hide loading indicator */
+}
+.meme-image {
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+/* Video Container Styling */
+.video-container {
+    position: relative;
+    width: 100%; /* Full width */
+    max-width: 100%; /* Prevents it from growing too large */
+    overflow: hidden; /* Ensures content does not overflow */
+    margin: 0 auto; /* Centering */
+}
+
+/* Video Styling */
+#promo-video {
+    width: 100%; /* Full width of the container */
+    height: auto; /* Maintain aspect ratio */
+    max-width: 100%; /* Prevents the video from growing beyond its container */
+    max-height: 80vh; /* Adjust to fit within viewport height, you can modify this */
+    object-fit: cover; /* Ensures video covers the container while maintaining aspect ratio */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    promo-video {
+        max-height: 60vh; /* Adjust for smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    promo-video {
+        max-height: 50vh; /* Further adjust for very small screens */
+    }
+}
+/* Streak Container Styles */
+.streak {
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+  color: #00ff99; /* Text color to match the dashboard green */
+  border-radius: 10px; /* Rounded corners */
+  padding: 20px; /* Spacing inside the container */
+  width: auto; /* Set a fixed width */
+  box-shadow: 0px 0px 10px 0px #00ff99; /* Green glow effect */
+  text-align: center; /* Center the text */
+  position: absolute; /* Absolute positioning */
+  left: 20px; /* Distance from the left edge */
+  top: 20px; /* Distance from the top edge */
+  transform: translateY(0); /* Initial position */
+  opacity: 1; /* Full opacity */
+  transition: transform 0.5s ease, opacity 0.5s ease; /* Smooth transitions */
+  z-index: 10; /* Ensure it's above other elements */
+}
+
+/* Hover Effect */
+.streak:hover {
+  transform: translateY(-10px); /* Slightly lift the container */
+  opacity: 0.9; /* Slightly fade */
+}
+
+/* Media Query for Tablets and Smaller Screens */
+@media screen and (max-width: 768px) {
+  .streak {
+    width: auto; /* Adjust width for tablets */
+    font-size: 14px; /* Adjust font size */
+    padding: 15px; /* Adjust padding */
+    left: 15px; /* Adjust position */
+    top: 15px; /* Adjust position */
+  }
+}
+
+
+/* Media Query for Mobile Phones */
+@media screen and (max-width: 480px) {
+  .streak {
+    width: auto; /* Adjust width for mobile phones */
+    font-size: 12px; /* Further adjust font size */
+    padding: 10px; /* Adjust padding */
+    left: 10px; /* Adjust position */
+    top: 10px; /* Adjust position */
+  }
+}
+/* Priorities Page Styling */
+.priorities-container {
+  background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black background */
+  border-radius: 12px; /* Rounded corners */
+  padding: 20px; /* Padding inside container */
+  max-width: 600px; /* Maximum width */
+  margin: 20px auto; /* Centering container */
+  box-shadow: 0 0 15px #00ff99; /* Green glow effect */
+  color: #00ff99; /* Green text color */
+  text-align: center; /* Center text */
+}
+
+.priority-header {
+  color: #00ff99; /* Green color for header */
+  font-size: 28px; /* Larger font size for header */
+  margin-bottom: 20px; /* Space below header */
+  animation: heartbeat 1.5s infinite; /* Pulse animation */
+}
+
+.priority-item {
+  background-color: rgba(0, 0, 0, 0.6); /* Slightly transparent background */
+  border-radius: 8px; /* Rounded corners */
+  padding: 15px; /* Padding inside item */
+  margin-bottom: 15px; /* Space between items */
+  box-shadow: 0 0 10px #00ff99; /* Green shadow effect */
+  color: #fff; /* White text color */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+}
+
+.priority-item:hover {
+  transform: translateY(-5px); /* Lift effect */
+  box-shadow: 0 0 15px #00ff99; /* Enhanced shadow on hover */
+}
+
+.priority-item h3 {
+  color: #00ff99; /* Green color for headings */
+  margin: 0; /* Remove margin */
+}
+
+.priority-item p {
+  margin: 10px 0; /* Margin around text */
+}
+
+/* Priority Form Styling */
+.priority-form {
+  background-color: rgba(0, 0, 0, 0.8); /* Consistent background */
+  border-radius: 12px; /* Rounded corners */
+  padding: 20px; /* Padding inside form */
+  box-shadow: 0 0 15px #00ff99; /* Green glow effect */
+  margin-top: 20px; /* Space above form */
+}
+
+.priority-form h2 {
+  color: #00ff99; /* Green color for form heading */
+  margin-top: 0; /* Remove top margin */
+}
+
+.priority-form label {
+  display: block; /* Block display for labels */
+  margin: 10px 0 5px; /* Spacing around labels */
+  color: #00ff99; /* Green color for labels */
+}
+
+.priority-form input, .priority-form button {
+  display: block; /* Block display for inputs and buttons */
+  margin: 5px 0 10px; /* Spacing around elements */
+  padding: 10px; /* Padding inside elements */
+  width: 100%; /* Full width */
+  border-radius: 6px; /* Rounded corners */
+  border: 1px solid #ddd; /* Light border */
+}
+
+.priority-form input:focus, .priority-form button:focus {
+  outline: none; /* Remove outline */
+  border-color: #00ff99; /* Green border on focus */
+}
+
+.priority-form button {
+  background-color: #00ff99; /* Green button background */
+  color: #fff; /* White text color */
+  cursor: pointer; /* Pointer cursor */
+  border: none; /* Remove border */
+  font-size: 16px; /* Font size for button text */
+}
+
+.priority-form button:hover {
+  background-color: #00cc80; /* Darker green on hover */
+}
+/* Container for priorities */
+.priorities-container {
+  background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black background */
+  border-radius: 12px; /* Rounded corners */
+  padding: 20px; /* Space inside the container */
+  max-width: 600px; /* Maximum width of the container */
+  margin: 20px auto; /* Center the container */
+  box-shadow: 0 0 15px #00ff99; /* Glowing effect */
+  color: #00ff99; /* Text color */
+  text-align: center; /* Center text alignment */
+}
+
+/* Header for priorities */
+.priority-header {
+  color: #00ff99; /* Text color */
+  font-size: 28px; /* Larger font size for visibility */
+  margin-bottom: 20px; /* Space below the header */
+  animation: heartbeat 1.5s infinite; /* Pulse animation */
+}
+
+/* Priority items */
+.priority-item {
+  background-color: rgba(0, 0, 0, 0.6); /* Slightly transparent background */
+  border-radius: 8px; /* Rounded corners */
+  padding: 15px; /* Space inside each item */
+  margin-bottom: 15px; /* Space between items */
+  box-shadow: 0 0 10px #00ff99; /* Glowing effect */
+  color: #fff; /* Text color */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+}
+
+/* Hover effect for priority items */
+.priority-item:hover {
+  transform: translateY(-5px); /* Slight lift on hover */
+  box-shadow: 0 0 15px #00ff99; /* Increased glow on hover */
+}
+
+/* Animation for priority header */
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Responsive design adjustments */
+@media screen and (max-width: 768px) {
+  .priorities-container {
+    padding: 15px; /* Adjust padding */
+  }
+
+  .priority-header {
+    font-size: 24px; /* Slightly smaller font size */
+  }
+
+  .priority-item {
+    padding: 12px; /* Adjust padding */
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .priorities-container {
+    padding: 10px; /* Further adjust padding */
+  }
+
+  .priority-header {
+    font-size: 20px; /* Smaller font size */
+  }
+
+  .priority-item {
+    padding: 10px; /* Further adjust padding */
+  }
+}
+/* Styling for the priority display */
+#priorityDisplayHome {
+  background-color: rgba(0, 0, 0, 0.8); /* Dark background */
+  color: #00ff99; /* Green text color */
+  border: 2px solid #00ff99; /* Green border */
+  border-radius: 10px; /* Rounded corners */
+  padding: 20px; /* Spacing inside the element */
+  font-size: 20px; /* Larger font size for emphasis */
+  text-align: center; /* Center the text */
+  box-shadow: 0 0 10px 3px #00ff99; /* Glowing shadow */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transitions */
+}
+
+#priorityDisplayHome.no-goal {
+  background-color: rgba(0, 0, 0, 0.7); /* Slightly different background for no goal */
+  color: #ff4d4d; /* Red text color for no goal */
+  border-color: #ff4d4d; /* Red border for no goal */
+}
+
+
+/* Media Query for Mobile Phones */
+@media screen and (max-width: 480px) {
+  .streak {
+    width: auto; /* Adjust width for mobile phones */
+    font-size: 12px; /* Further adjust font size */
+    padding: 10px; /* Adjust padding */
+    left: 10px; /* Adjust position */
+    top: 10px; /* Adjust position */
+  }
+}
+

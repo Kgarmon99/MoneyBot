@@ -1,0 +1,184 @@
+/* Base Styling */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background: #000; /* Black background */
+    color: #00ff99; /* Green text */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Header */
+header {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    padding: 8px 15px; /* Reduced padding */
+    box-shadow: 0 4px 10px rgba(0, 255, 153, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+header .logo {
+    width: 50px; /* Reduced size */
+    height: 50px; /* Reduced size */
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(0, 255, 153, 0.6);
+    animation: pulseLogo 3s infinite alternate;
+    transition: transform 0.5s ease, filter 0.5s ease;
+    margin-right: 10px; /* Reduced margin */
+}
+
+header h1 {
+    color: #00ff99; /* Green color */
+    font-size: 2rem; /* Reduced font size */
+    margin: 0;
+    animation: heartbeat 1.5s infinite;
+    text-shadow: 0 0 10px rgba(0, 255, 153, 0.5);
+}
+
+/* Main Content */
+main {
+    width: 90%;
+    max-width: 800px; /* Adjusted max-width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px; /* Reduced padding */
+    margin-top: 10px; /* Reduced margin */
+}
+
+section {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 15px; /* Reduced radius */
+    box-shadow: 0 0 20px rgba(0, 255, 153, 0.4);
+    padding: 20px; /* Reduced padding */
+    margin: 15px 0; /* Reduced margin */
+    width: 100%;
+}
+
+section h2 {
+    color: #00ff99; /* Green color */
+    font-size: 1.8rem; /* Reduced font size */
+    text-align: center;
+    margin-bottom: 15px; /* Reduced margin */
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Reduced gap */
+}
+
+label {
+    font-size: 1rem; /* Reduced font size */
+    color: #ccc;
+}
+
+input[type="text"], input[type="date"] {
+    padding: 10px; /* Reduced padding */
+    border: 2px solid #00ff99;
+    border-radius: 8px; /* Reduced radius */
+    background-color: #001e1a;
+    color: #00ff99;
+    font-size: 1rem; /* Reduced font size */
+}
+
+button {
+    background-color: #00ff99; /* Green button */
+    color: black; /* Black text */
+    padding: 10px 15px; /* Reduced padding */
+    border: none;
+    border-radius: 25px; /* Reduced radius */
+    cursor: pointer;
+    font-size: 1rem; /* Reduced font size */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.6rem; /* Further reduced font size for smaller screens */
+    }
+
+    section {
+        padding: 15px; /* Reduced padding */
+    }
+
+    button {
+        font-size: 1rem; /* Adjusted for mobile */
+        padding: 10px 12px; /* Adjusted for mobile */
+    }
+
+/* Bottom Navigation */
+.bottom-navigation {
+    background: rgba(0, 255, 153, 0.2); /* Light green background */
+    backdrop-filter: blur(10px);
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0; /* Reduced padding for a more compact look */
+    border-top: 2px solid #00ff99; /* Green border */
+    z-index: 100;
+    box-shadow: 0 -2px 15px rgba(0, 255, 153, 0.5); /* Green glow */
+}
+
+.nav-box {
+    background: linear-gradient(145deg, #001f24, #003340);
+    border: 2px solid #00ff99; /* Green border */
+    border-radius: 10px; /* Slightly smaller border-radius */
+    padding: 10px; /* Reduced padding for smaller size */
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 255, 153, 0.3); /* Green shadow */
+    transition: all 0.3s ease;
+    flex: 1; /* Ensures equal width for all nav boxes */
+    margin: 0 5px; /* Adds space between nav boxes */
+}
+
+.nav-box:hover {
+    box-shadow: 0 8px 20px rgba(0, 255, 153, 0.6); /* Stronger green shadow */
+    transform: translateY(-3px); /* Slightly less aggressive hover effect */
+}
+
+.nav-box a {
+    color: #00ff99; /* Green text */
+    text-decoration: none;
+    font-size: 1.2rem; /* Adjusted font size for better readability */
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.nav-box a:hover {
+    color: #00ccff; /* Lighter green on hover */
+}
+
+/* Responsive Design for Bottom Navigation */
+@media (max-width: 768px) {
+    .bottom-navigation {
+        padding: 8px 0; /* Further reduce padding on smaller screens */
+    }
+
+    .nav-box {
+        padding: 8px; /* Adjusted padding for smaller devices */
+        margin: 0 3px; /* Less margin for smaller screens */
+    }
+
+    .nav-box a {
+        font-size: 1.1rem; /* Smaller font size for mobile */
+    }
+}

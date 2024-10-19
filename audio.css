@@ -1,0 +1,223 @@
+/* Reset default margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styling */
+body {
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #000000, #333333); /* Gradient background */
+    color: #00ff99; /* Neon green text */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Header Styling */
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.9); /* More opaque */
+    backdrop-filter: blur(15px); /* Enhanced glassmorphism effect */
+    box-shadow: 0 6px 30px rgba(0, 255, 153, 0.5); /* Stronger neon glow */
+    border-bottom: 2px solid #00ff99; /* Add a bottom border for better separation */
+    border-radius: 0 0 15px 15px; /* Rounded bottom corners */
+}
+
+/* App Title Styling */
+.app-title {
+    color: #00ff99;
+    font-size: 36px; /* Larger font size */
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 4px; /* Wider letter spacing */
+    animation: glow 1.5s ease-in-out infinite alternate;
+    text-shadow: 0 0 30px #00ff99, 0 0 50px #00ff99, 0 0 70px #00ff99; /* Enhanced glow */
+}
+
+/* Glow Animation */
+@keyframes glow {
+    from {
+        text-shadow: 0 0 30px #00ff99, 0 0 50px #00ff99, 0 0 70px #00ff99;
+    }
+    to {
+        text-shadow: 0 0 40px #00ff99, 0 0 70px #00ff99, 0 0 100px #00ff99;
+    }
+}
+
+/* Section Title */
+.section-title {
+    color: #00ff99;
+    font-size: 32px; /* Larger font size */
+    font-weight: bold;
+    text-align: center;
+    margin: 120px 0 30px; /* Increased top margin */
+    animation: pulse 1.5s infinite;
+    text-transform: uppercase;
+    letter-spacing: 2.5px; /* Wider letter spacing */
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 5px rgba(0, 255, 153, 0.6); /* Subtle shadow for better visibility */
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+    0% {
+        text-shadow: 0 0 20px #00ff99, 0 0 30px #00ff99, 0 0 40px #00ff99;
+    }
+    100% {
+        text-shadow: 0 0 30px #00ff99, 0 0 50px #00ff99, 0 0 70px #00ff99;
+    }
+}
+
+/* Stage Styling */
+.stage {
+    width: 500px; /* Larger size */
+    height: 500px;
+    background: rgba(0, 0, 0, 0.8); /* Slightly more opaque */
+    border: 10px solid #00ff99; /* Thicker border */
+    border-radius: 50%;
+    padding: 35px;
+    box-shadow: 0 6px 25px rgba(0, 255, 153, 0.5), inset 0 0 25px rgba(0, 255, 153, 0.4); /* Enhanced glow */
+    margin: 60px 0;
+    position: relative;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    animation: heartbeat 2s infinite;
+    max-height: 400px;
+    overflow-y: auto;
+    backdrop-filter: blur(10px); /* Additional backdrop blur */
+}
+
+/* Stage Hover Effect */
+.stage:hover {
+    border-color: #00ff99;
+    box-shadow: 0 0 90px rgba(0, 255, 153, 0.7), inset 0 0 35px rgba(0, 255, 153, 0.6);
+    transform: scale(1.1); /* Slightly more pronounced scaling */
+}
+
+/* Level Button Styling */
+.level-button {
+    background: #1a1a1a;
+    color: #00ff99;
+    border: 2px solid #00ff99;
+    border-radius: 50px; /* More rounded corners */
+    padding: 20px 40px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 22px; /* Larger font size */
+    font-weight: bold;
+    margin-top: 20px;
+    width: 90%;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 255, 153, 0.5);
+}
+
+.level-button:hover {
+    background: #00ff99;
+    color: #1a1a1a;
+    box-shadow: 0 0 20px rgba(0, 204, 153, 0.6);
+    transform: translateY(-6px);
+}
+
+/* Bottom Navigation */
+.bottom-navigation {
+    background: rgba(0, 255, 153, 0.3); /* More transparent */
+    backdrop-filter: blur(15px); /* Enhanced blur effect */
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    justify-content: space-around;
+    padding: 20px 0;
+    z-index: 100;
+    border-top: 2px solid #00ff99;
+    border-radius: 15px 15px 0 0; /* Rounded top corners */
+    box-shadow: 0 -4px 20px rgba(0, 255, 153, 0.5); /* Subtle top shadow */
+}
+
+/* Navigation Box */
+.nav-box {
+    background: #333;
+    border: 2px solid #00ff99;
+    border-radius: 12px; /* Rounded corners */
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0, 255, 153, 0.4);
+    transition: all 0.3s ease;
+}
+
+.nav-box:hover {
+    box-shadow: 0 0 25px rgba(0, 255, 153, 0.6);
+    transform: translateY(-6px);
+}
+
+.nav-box a {
+    color: #00ff99;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 14px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #00ff99;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #00cc99;
+}
+
+/* Miscellaneous Enhancements */
+.level-title-first {
+    font-size: 34px; /* Larger font size */
+    text-shadow: 0 4px 8px rgba(0, 255, 153, 0.4);
+    margin-bottom: 35px; /* Increased margin */
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+/* Icon Styling */
+.icon {
+    width: 50px; /* Larger size */
+    height: 50px;
+    background: #000;
+    border-radius: 50%;
+    margin-right: 15px;
+    box-shadow: 0 0 15px rgba(0, 255, 153, 0.6);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.icon:hover {
+    transform: scale(1.2); /* Larger scaling effect */
+    box-shadow: 0 0 20px rgba(0, 255, 153, 0.8); /* Enhanced shadow */
+

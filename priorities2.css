@@ -1,0 +1,216 @@
+/* Base Styling */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(180deg, #002b36, #073642); /* Dark, natural colors */
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Header */
+header {
+    width: 100%;
+    background: rgba(0, 43, 54, 0.95);
+    padding: 10px 30px;
+    box-shadow: 0 4px 15px rgba(0, 255, 153, 0.7);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+header .logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(0, 255, 153, 0.6);
+    animation: pulseLogo 3s infinite alternate;
+    transition: transform 0.5s ease, filter 0.5s ease;
+    margin-right: 15px;
+}
+
+header .logo:hover {
+    transform: rotate(360deg) scale(1.1);
+    filter: brightness(1.2);
+}
+
+header h1 {
+    color: #00ff99;
+    font-size: 2.4rem;
+    margin: 0;
+    animation: heartbeat 1.5s infinite;
+    text-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    header {
+        padding: 10px 15px;
+    }
+
+    header .logo {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* Main Content */
+main {
+    width: 90%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    margin-top: 20px;
+}
+
+section {
+    background: rgba(0, 43, 54, 0.8);
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(0, 255, 153, 0.4);
+    padding: 30px;
+    margin: 20px 0;
+    width: 100%;
+    max-width: 800px;
+}
+
+section h2 {
+    color: #00ff99;
+    font-size: 2.2rem;
+    text-align: center;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(0, 255, 153, 0.6);
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+label {
+    font-size: 1.2rem;
+    color: #ccc;
+}
+
+input[type="text"], input[type="date"] {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #00ff99;
+    border-radius: 10px;
+    background-color: #003745;
+    color: #fff;
+    font-size: 1.1rem;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus, input[type="date"]:focus {
+    border-color: #00ffaa;
+}
+
+button {
+    background-color: #00ff99;
+    color: white;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1.3rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: #00ffaa;
+    transform: scale(1.05);
+}
+
+/* Priority Display */
+.current-priority {
+    font-size: 1.8rem;
+    color: #00ff99;
+    text-align: center;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 255, 153, 0.4);
+    padding: 30px;
+}
+
+/* Bottom Navigation */
+.bottom-navigation {
+    background: rgba(0, 255, 153, 0.2);
+    backdrop-filter: blur(10px);
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    justify-content: space-around;
+    padding: 15px 0;
+    border-top: 2px solid #00ff99;
+    z-index: 100;
+    box-shadow: 0 -2px 15px rgba(0, 255, 153, 0.5);
+}
+
+.nav-box {
+    background: linear-gradient(145deg, #001f24, #003340);
+    border: 2px solid #00ff99;
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 255, 153, 0.3);
+    transition: all 0.3s ease;
+}
+
+.nav-box:hover {
+    box-shadow: 0 8px 20px rgba(0, 255, 153, 0.6);
+    transform: translateY(-5px);
+}
+
+.nav-box a {
+    color: #00ff99;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.nav-box a:hover {
+    color: #00ffaa;
+}
+
+/* Animations */
+@keyframes pulseLogo {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 20px #00ff99, 0 0 30px #00ff99, 0 0 50px #00ff99;
+    }
+    100% {
+        transform: scale(1.1);
+        box-shadow: 0 0 30px #00ff99, 0 0 60px #00ff99, 0 0 100px #00ff99;
+    }
+}
+
+@keyframes heartbeat {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}

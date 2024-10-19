@@ -1,0 +1,70 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RMJ3B4R3TN"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RMJ3B4R3TN');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>MoneyBot Home</title>
+</head>
+<body>
+  <header>
+      <div class="header-content">
+          <div class="header-left">
+              <div id="streakDisplay" class="streak"></div>
+              <img class="logo" src="images/MoneybotLogo.png" alt="MoneyBot Logo">
+          </div>
+      </div>
+  </header>
+
+  <main>
+      <!-- Top Priority Feature -->
+      <section class="top-priority">
+          <div class="priority-header"></div>
+          <div id="priorityDisplayHome" class="priority-display"></div>
+      </section>
+
+      <!-- Dashboard -->
+      <section class="dashboard">
+          <!-- Library -->
+          <a href="library.html" class="dashboard-item library">
+              <h2>📚 Library</h2>
+              <p>Audio, Visuals and more.</p>
+          </a>
+
+          <!-- ChatBot -->
+          <a href="Chatbot2.html" class="dashboard-item chatbot">
+              <h2>🤖 Copilot (Beta)</h2>
+              <p>Custom tips and answers to all your questions.</p>
+          </a>
+      </section>
+
+      <!-- Welcome Section -->
+      <section class="welcome-section">
+          <!-- Quote with Button -->
+          <div class="quote-with-button">
+              <div id="quote-display" class="quote">
+                  <p>"I will tell you how to become rich. Close the doors. Be fearful when others are greedy. Be greedy when others are fearful." — Warren Buffett</p>
+              </div>
+              <!-- Goat Button -->
+              <button id="generate-more-button" class="generate-more-button dashboard-item">Goat Button</button>
+          </div>
+      </section>
+  </main>
+
+  <footer>
+      <p>&copy; 2024 MoneyBot. All rights reserved.</p>
+  </footer>
+
+  <script src="home.js"></script>
+</body>

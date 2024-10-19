@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="priorities.css">
+    <title>Manage Goal</title>
+</head>
+<body>
+  <header>
+      <div class="header-content">
+          <div class="header-left">
+              <img class="logo" src="images/MoneybotLogo.png" alt="MoneyBot Logo">
+              <h1>Manage Your Daily Goal</h1>
+          </div>
+      </div>
+  </header>
+
+  <main>
+      <!-- Task Form -->
+      <section class="task-form">
+          <h2>Add Your Goal for Today</h2>
+          <form id="taskForm">
+              <label for="taskName">Task Name:</label>
+              <input type="text" id="taskName" required>
+
+              <label for="date">Date:</label>
+              <input type="date" id="date" required>
+
+              <button type="submit" id="addTaskButton">Set Goal</button>
+          </form>
+      </section>
+
+      <!-- Display Current Priority -->
+      <section class="current-priority">
+
+<div id="priorityDisplay">No Goals set for today.</div>
+      </section>
+  </main>
+
+        <!-- Embed the chatbot -->
+        <zapier-interfaces-chatbot-embed is-popup='true' chatbot-id='cm08ttupf0005yvzh163ldfcu' height='600px' width='400px'></zapier-interfaces-chatbot-embed>
+
+        <canvas id="visualizer"></canvas>
+
+        <nav class="bottom-navigation">
+            <a href="index.html" class="nav-box">🏠</a>
+            <a href="comingsoon.html" class="nav-box">🛠️</a>
+            <a href="Chatbot2.html" class="nav-box">🤖</a>
+
+
+  <script src="priorities.js"></script>
+</body>
+</html>

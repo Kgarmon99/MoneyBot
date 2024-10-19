@@ -1,0 +1,151 @@
+/* Updated CSS for budget planner */
+/* Base styling */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container {
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 30px;
+  border-radius: 10px;
+  width: 400px;
+  box-shadow: 0px 0px 10px 0px #00ff99;
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.container:hover {
+  transform: translateY(-10px);
+  opacity: 0.9;
+}
+
+/* Logo styling */
+.logo {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 20px;
+  animation: coolLogo 2s ease infinite alternate;
+  border-radius: 50%;
+}
+
+@keyframes coolLogo {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 20px #00ff99, 0 0 40px #00ff99, 0 0 60px #00ff99;
+  }
+
+  100% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #00ff99, 0 0 60px #00ff99, 0 0 100px #00ff99;
+  }
+}
+
+/* Title styling */
+.app-title,
+.page-title {
+  color: #00ff99;
+  font-size: 24px;
+  margin-top: 10px;
+  animation: heartbeat 1.5s infinite;
+}
+
+@keyframes heartbeat {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Button styling */
+.animated-btn {
+  background-color: #00ff99;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.animated-btn:hover {
+  background-color: #00cc77;
+  transform: scale(1.05);
+}
+
+/* Input field styling */
+.input-field,
+.select-field {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  background-color: rgba(0, 0, 0, 0.4);
+  color: white;
+}
+
+.input-field::placeholder {
+  color: #ccc;
+}
+
+.input-field:focus {
+  outline: none;
+  box-shadow: 0px 0px 5px #00ff99;
+}
+
+/* Pie chart styles */
+.pie-chart {
+  width: 200px;
+  height: 200px;
+  margin-top: 20px;
+}
+
+/* Breakdown section */
+.breakdown {
+  text-align: left;
+  margin-top: 20px;
+}
+
+.breakdown h3 {
+  color: #00ff99;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.breakdown ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.breakdown li {
+  color: white;
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.breakdown span {
+  font-weight: bold;
+  color: #00ff99;
+}

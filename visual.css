@@ -1,0 +1,183 @@
+/* Base Styling */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(180deg, #000, #333);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Header */
+header {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 10px 20px;
+    box-shadow: 0 4px 15px rgba(0, 255, 153, 0.7);
+    backdrop-filter: blur(10px);
+}
+
+.header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(0, 255, 153, 0.6);
+    animation: coolLogo 2s infinite alternate;
+    transition: transform 0.5s ease, filter 0.5s ease, box-shadow 0.5s ease;
+}
+
+.logo:hover {
+    transform: rotate(360deg) scale(1.2);
+    filter: brightness(1.2) contrast(1.2);
+    box-shadow: 0 0 30px rgba(0, 255, 153, 0.8);
+}
+
+.app-title {
+    color: #00ff99;
+    font-size: 2.5rem;
+    margin: 10px 0;
+    animation: heartbeat 1.5s infinite;
+    text-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
+}
+
+/* Main Content */
+main {
+    width: 90%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    position: relative;
+}
+
+.video-container {
+    width: 100%;
+    margin: 20px auto;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0, 255, 153, 0.4);
+    overflow: hidden;
+}
+
+#promo-video {
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
+    object-fit: cover;
+}
+
+/* Meme Feed */
+.meme-feed {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px auto;
+}
+
+.meme-item {
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.meme-image {
+    max-width: 100%;
+    border-radius: 20px;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    box-shadow: 0 0 20px rgba(0, 255, 153, 0.2);
+}
+
+.meme-image:hover {
+    transform: scale(1.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Loading Indicator */
+.loading-indicator {
+    text-align: center;
+    font-size: 1.5rem;
+    margin: 20px 0;
+    color: #00ff99;
+    text-shadow: 0 0 10px rgba(0, 255, 153, 0.5);
+}
+
+/* Bottom Navigation */
+.bottom-navigation {
+    background: rgba(0, 255, 153, 0.2);
+    backdrop-filter: blur(10px);
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    justify-content: space-around;
+    padding: 15px 0;
+    border-top: 2px solid #00ff99;
+    z-index: 100;
+    box-shadow: 0 -2px 15px rgba(0, 255, 153, 0.5);
+}
+
+.nav-box {
+    background: linear-gradient(145deg, #222, #333);
+    border: 2px solid #00ff99;
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 255, 153, 0.3);
+    transition: all 0.3s ease;
+}
+
+.nav-box:hover {
+    box-shadow: 0 8px 20px rgba(0, 255, 153, 0.6);
+    transform: translateY(-5px);
+}
+
+.nav-box a {
+    color: #00ff99;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.nav-box a:hover {
+    color: #00cc77;
+}
+
+/* Animations */
+@keyframes coolLogo {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 20px #00ff99, 0 0 30px #00ff99, 0 0 50px #00ff99;
+    }
+    100% {
+        transform: scale(1.1);
+        box-shadow: 0 0 30px #00ff99, 0 0 60px #00ff99, 0 0 100px #00ff99;
+    }
+}
+
+@keyframes heartbeat {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Chatbot overlay styling */
+zapier-interfaces-chatbot-embed {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    margin: 0;
+    z-index: 9999; /* Ensure it's on top of other content */
+

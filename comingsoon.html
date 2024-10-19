@@ -1,0 +1,280 @@
+
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Coming Soon - MoneyBot</title>
+    <link rel="stylesheet" href="comingsoon.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header Section -->
+        <header>
+            <div class="logo-container">
+                <img src="images/MoneybotLogo.png" alt="Logo" class="logo">
+            </div>
+            <h1 class="coming-soon-title">Coming Soon</h1>
+            <p class="subtitle">New features are on the way! Stay tuned.</p>
+        </header>
+
+        <!-- Countdown Timer -->
+        <div class="countdown">
+            <h2>Time Remaining Until Launch</h2>
+            <div id="timer" class="timer">
+                <span id="days"></span> Days 
+                <span id="hours"></span> Hours 
+                <span id="minutes"></span> Minutes 
+                <span id="seconds"></span> Seconds
+            </div>
+        </div>
+
+        <!-- Timeline Section -->
+        <section class="timeline">
+            <h2>Upcoming Features</h2>
+            <ul id="timeline-list"></ul>
+        </section>
+    </div>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2024 MoneyBot. All Rights Reserved.</p>
+    </footer>
+
+    <script src="comingsoon.js"></script>
+=======
+    <title>Coming Soon | MoneyBot Tools</title>
+    <style>
+        /* Basic Reset */
+        body, h1, h2, p, input, button {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Container Styling */
+        .coming-soon-container {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
+            border-radius: 20px;
+            box-shadow: 0px 0px 40px rgba(0, 255, 153, 0.6);
+            animation: fadeIn 1s ease-in-out;
+            position: relative; /* Ensure positioning for the home button */
+        }
+
+        /* Logo Styling */
+        .coming-soon-logo {
+            max-width: 200px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        /* Heading Styling */
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #00ff99;
+            text-shadow: 0px 0px 10px rgba(0, 255, 153, 0.7);
+        }
+
+        /* Countdown Styling */
+        .countdown {
+            margin: 30px 0;
+        }
+
+        .countdown-timer {
+            font-size: 2.5em;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #00ff99;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 255, 153, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Signup Form Styling */
+        .signup-form {
+            margin-top: 20px;
+        }
+
+        .signup-form p {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .signup-form input {
+            padding: 15px;
+            font-size: 1em;
+            border: none;
+            border-radius: 25px;
+            margin-right: 10px;
+            width: calc(100% - 140px);
+            background-color: #333;
+            color: #fff;
+            box-shadow: inset 0px 0px 10px rgba(0, 255, 153, 0.5);
+        }
+
+        .signup-form button {
+            padding: 15px 25px;
+            font-size: 1em;
+            border: none;
+            border-radius: 25px;
+            background-color: #00ff99;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0px 0px 10px rgba(0, 255, 153, 0.5);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .signup-form button:hover {
+            background-color: #00cc77;
+            transform: scale(1.05);
+        }
+
+        /* Return Home Button Styling */
+        .return-home {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .return-home a {
+            text-decoration: none;
+            background-color: #00ff99;
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: 0px 0px 10px rgba(0, 255, 153, 0.5);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .return-home a:hover {
+            background-color: #00cc77;
+            transform: scale(1.05);
+        }
+
+        /* Keyframe Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0px 0px 20px rgba(0, 255, 153, 0.5); }
+            50% { box-shadow: 0px 0px 30px rgba(0, 255, 153, 0.7); }
+            100% { box-shadow: 0px 0px 20px rgba(0, 255, 153, 0.5); }
+        }
+
+        /* Media Query for Tablets and Smaller Screens */
+        @media screen and (max-width: 768px) {
+            .coming-soon-container {
+                padding: 30px;
+            }
+
+            .countdown-timer {
+                font-size: 2em;
+                padding: 15px;
+            }
+
+            .signup-form input {
+                width: calc(100% - 130px);
+            }
+
+            .signup-form button {
+                padding: 12px 20px;
+            }
+        }
+
+        /* Media Query for Mobile Phones */
+        @media screen and (max-width: 480px) {
+            .coming-soon-container {
+                padding: 20px;
+            }
+
+            .countdown-timer {
+                font-size: 1.5em;
+                padding: 10px;
+            }
+
+            .signup-form input {
+                width: calc(100% - 120px);
+            }
+
+            .signup-form button {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="coming-soon-container">
+        <div class="coming-soon-content">
+            <img src="MoneybotLogo.png" alt="MoneyBot Logo" class="coming-soon-logo">
+            <h1>Exciting Tools Are On Their Way!</h1>
+            <p>We’re working hard to bring you new tools that will revolutionize your experience. Stay tuned!</p>
+            <div class="countdown">
+                <h2>Countdown to Launch:</h2>
+                <div id="countdown-timer" class="countdown-timer"></div>
+            </div>
+            <div class="signup-form">
+                <p>Be the first to know when we launch:</p>
+                <form id="signup-form">
+                    <input type="email" placeholder="Enter your email" required>
+                    <button type="submit">Sign Up</button>
+                </form>
+            </div>
+            <!-- Return Home Button -->
+            <div class="return-home">
+                <a href="index.html">Return Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set the date we're counting down to
+        const countDownDate = new Date("Oct 4, 2024 00:00:00").getTime();
+
+        // Update the countdown every 1 second
+        const x = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+
+            // Time calculations
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Display the result in the element with id="countdown-timer"
+            document.getElementById("countdown-timer").innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+            // If the countdown is over, display a message
+            if (distance < 0) {
+                clearInterval(x);
+                document.getElementById("countdown-timer").innerHTML = "EXPIRED";
+            }
+        }, 1000);
+    </script>
+
+</body>
+</html>

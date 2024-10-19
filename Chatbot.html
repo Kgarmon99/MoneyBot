@@ -1,0 +1,399 @@
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RMJ3B4R3TN"></script>
+<script>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Bot Collection</title>
+            <link rel="stylesheet" href="styles.css">
+        </head>
+        <body>
+            <header>
+                <img class="logo" src="images/MoneybotLogo.png" alt="Bot Logo">
+                <h1 class="app-title">Bot Collection</h1>
+            </header>
+
+            <div class="welcome-section">
+                <p>Welcome to our collection of wisdom bots. Dive into the insights from some of history's greatest minds.</p>
+            </div>
+
+            <div class="dashboard">
+                <!-- FounderBot Section -->
+                <div class="dashboard-item" id="founderBot">
+                    <h2>FounderBot🐐</h2>
+                    <select id="founderSelect"></select>
+                    <button class="animated-btn" onclick="fetchFounderQuote()">🤖</button>
+                    <p class="quote" id="founderBotQuote"></p>
+                </div>
+
+              <!-- MentalModelBot Section -->
+              <div class="dashboard-item" id="mentalModelBot">
+                  <h2>MentalModelBot</h2>
+                  <select id="mentalModelSelect"></select>
+                  <button class="animated-btn" onclick="fetchMentalModelQuote()">🤖</button>
+                  <p class="quote" id="mentalModelQuote"></p>
+              </div>
+                <!-- Other Bots as "Coming Soon" -->
+                <div class="dashboard-item coming-soon" id="mambaBot">
+                    <h2>MambaBot🐍</h2>
+                    <p class="coming-soon-text">Coming Soon...</p>
+                </div>
+
+                <div class="dashboard-item coming-soon" id="berkshireBot">
+                    <h2>BerkshireBot🧓🏻</h2>
+                    <p class="coming-soon-text">Coming Soon...</p>
+                </div>
+
+              
+
+
+                <div class="dashboard-item coming-soon" id="atomicFerris">
+                    <h2>AtomicFerrisBot⚛️</h2>
+                    <p class="coming-soon-text">Coming Soon...</p>
+                </div>
+            </div>
+
+          <div class="dashboard-item coming-soon" id="atomicFerris">
+                  <h2>KGBOT🕺🏽</h2>
+                  <p class="coming-soon-text">Coming Soon...</p>
+              </div>
+          </div>
+
+
+          <div class="bottom-navigation">
+               <div class="nav-box">
+                   <a href="index.html">🏠</a>
+               </div>
+               <div class="nav-box">
+                   <a href="habit-tracker.html">📈</a>
+               </div>
+               <div class="nav-box">
+                   <a href="library.html">📚</a>
+               </div>
+               
+=======
+            <div class="bottom-navigation">
+                <div class="nav-box"><a href="index.html">Home</a></div>
+                <div class="nav-box"><a href="about.html">About</a></div>
+                <div class="nav-box"><a href="contact.html">Contact</a></div>
+            </div>
+
+
+            <script>
+                  const quotes = {
+                    "Steve Jobs": [
+                      "Stay hungry, stay foolish.",
+                      "Innovation distinguishes between a leader and a follower.",
+                      "Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work.",
+                      "The only way to do great work is to love what you do.",
+                      "Remembering that you are going to die is the best way I know to avoid the trap of thinking you have something to lose."
+                    ],
+                    "Elon Musk": [
+                      "When something is important enough, you do it even if the odds are not in your favor.",
+                      "Persistence is very important.",
+                      "If you get up in the morning and think the future is going to be better, it is a bright day. Otherwise, it's not.",
+                      "Failure is an option here. If things are not failing, you are not innovating enough.",
+                      "I think it is possible for ordinary people to choose to be extraordinary."
+                    ],
+                    "Bill Gates": [
+                      "Don't compare yourself with anyone in this world...if you do so, you are insulting yourself.",
+                      "It's fine to celebrate success but it is more important to heed the lessons of failure.",
+                      "Your most unhappy customers are your greatest source of learning.",
+                      "I choose a lazy person to do a hard job. Because a lazy person will find an easy way to do it.",
+                      "Success is a lousy teacher. It seduces smart people into thinking they can't lose."
+                    ],
+                    "Warren Buffett": [
+                      "It takes 20 years to build a reputation and five minutes to ruin it.",
+                      "Price is what you pay. Value is what you get.",
+                      "Risk comes from not knowing what you're doing.",
+                      "Someone's sitting in the shade today because someone planted a tree a long time ago.",
+                      "The difference between successful people and really successful people is that really successful people say no to almost everything."
+                    ],
+                    "Oprah Winfrey": [
+                      "Turn your wounds into wisdom.",
+                      "You become what you believe, not what you think or what you want.",
+                      "The biggest adventure you can ever take is to live the life of your dreams.",
+                      "Be thankful for what you have; you'll end up having more.",
+                      "I trust that everything happens for a reason, even when we're not wise enough to see it."
+                    ],
+                     "Jeff Bezos": [
+                        "Your brand is what other people say about you when you’re not in the room.",
+                        "If you double the number of experiments you do per year you’re going to double your inventiveness.",
+                        "The common question that gets asked in business is, 'why?'. That’s a good question, but an equally valid question is, 'why not?'.",
+                        "If you don’t understand the details of your business you are going to fail.",
+                        "We are stubborn on vision. We are flexible on details."
+                      ],
+                      "Mark Zuckerberg": [
+                        "The biggest risk is not taking any risk.",
+                        "Move fast and break things. Unless you are breaking stuff, you are not moving fast enough.",
+                        "By giving people the power to share, we’re making the world more transparent.",
+                        "I wear the same outfit or, at least, a different copy of it almost every day.",
+                        "Find that thing you are super passionate about."
+                      ],
+                      "Larry Page": [
+                        "If you’re not doing some things that are crazy, then you’re doing the wrong things.",
+                        "You don’t need to have a 100 person company to develop that idea.",
+                        "Always deliver more than expected.",
+                        "You never lose a dream, it just incubates as a hobby.",
+                        "Many leaders of big organizations, I think, don’t believe that change is possible. But if you look at history, things can change."
+                      ],
+                      "Sergey Brin": [
+                        "Solving big problems is easier than solving little problems.",
+                        "You should try to make the world a better place because the inverse makes no sense.",
+                        "Too many rules stifle innovation.",
+                        "I would like to see anyone be able to achieve their dreams, and that’s what this organization does.",
+                        "We do lots of stuff. The only way you are going to have success is to have lots of failures first."
+                      ],
+                      "Richard Branson": [
+                        "If your dreams don't scare you, they are too small.",
+                        "Business opportunities are like buses, there's always another one coming.",
+                        "Do not be embarrassed by your failures, learn from them and start again.",
+                        "You don't learn to walk by following rules. You learn by doing, and by falling over.",
+                        "The best way to learn about anything is by doing."
+                      ],
+                      "Oprah Winfrey": [
+                        "Turn your wounds into wisdom.",
+                        "The biggest adventure you can ever take is to live the life of your dreams.",
+                        "Be thankful for what you have; you'll end up having more.",
+                        "Real integrity is doing the right thing, knowing that nobody's going to know whether you did it or not.",
+                        "You get in life what you have the courage to ask for."
+                      ],
+                      "Larry Ellison": [
+                        "When you innovate, you’ve got to be prepared for everyone telling you you're nuts.",
+                        "See things in the present, even if they are in the future.",
+                        "To model yourself after Steve Jobs is like, 'I’d like to paint like Picasso, what should I do? Should I use more red?'",
+                        "If an innovative piece of software comes along, Microsoft copies it and makes it part of Windows.",
+                        "I have had all of the disadvantages required for success."
+                      ],
+                      "Reed Hastings": [
+                        "Do not tolerate brilliant jerks. The cost to teamwork is too high.",
+                        "Seek excellence, not perfection.",
+                        "We're very focused on creating the world's most global Internet TV network.",
+                        "I find out what the content is and I am thrilled if I love it.",
+                        "Most entrepreneurial ideas will sound crazy, stupid and uneconomic, and then they'll turn out to be right."
+                      ],
+                      "Jack Ma": [
+                        "Never give up. Today is hard, tomorrow will be worse, but the day after tomorrow will be sunshine.",
+                        "If you don’t give up, you still have a chance. Giving up is the greatest failure.",
+                        "Help young people. Help small guys. Because small guys will be big.",
+                        "If we are a good team and know what we want to do, one of us can defeat ten of them.",
+                        "You should learn from your competitor, but never copy. Copy and you die."
+                      ],
+                    "Henry Ford": [
+                      "Failure is simply the opportunity to begin again, this time more intelligently.",
+                      "Whether you think you can, or you think you can't – you're right.",
+                      "The only real mistake is the one from which we learn nothing.",
+                      "Quality means doing it right when no one is looking.",
+                      "Obstacles are those frightful things you see when you take your eyes off your goal."
+                    ],
+                    "Thomas Edison": [
+                      "I have not failed. I've just found 10,000 ways that won't work.",
+                      "Opportunity is missed by most people because it is dressed in overalls and looks like work.",
+                      "Our greatest weakness lies in giving up. The most certain way to succeed is always to try just one more time.",
+                      "There is no substitute for hard work.",
+                      "The value of an idea lies in the using of it."
+                    ],
+                    "Alexander Graham Bell": [
+                      "When one door closes, another opens; but we often look so long and so regretfully upon the closed door that we do not see the one which has opened for us.",
+                      "Concentrate all your thoughts upon the work at hand. The sun's rays do not burn until brought to a focus.",
+                      "Before anything else, preparation is the key to success.",
+                      "The most successful men in the end are those whose success is the result of steady accretion.",
+                      "Great discoveries and improvements invariably involve the cooperation of many minds."
+                    ],
+                    "John D. Rockefeller": [
+                      "Don't be afraid to give up the good to go for the great.",
+                      "I do not think that there is any other quality so essential to success of any kind as the quality of perseverance. It overcomes almost everything, even nature.",
+                      "The way to make money is to buy when blood is running in the streets.",
+                      "If you want to succeed you should strike out on new paths, rather than travel the worn paths of accepted success.",
+                      "I always tried to turn every disaster into an opportunity."
+                    ],
+                    "Andrew Carnegie": [
+                      "The man who acquires the ability to take full possession of his own mind may take possession of anything else to which he is justly entitled.",
+                      "Do not look for approval except for the consciousness of doing your best.",
+                      "No man will make a great leader who wants to do it all himself or get all the credit for doing it.",
+                      "Teamwork is the ability to work together toward a common vision.",
+                      "People who are unable to motivate themselves must be content with mediocrity, no matter how impressive their other talents."
+                    ],
+                };
+
+              const mentalModelQuotes = {
+                "Leverage": [
+                    "\"Give me a lever long enough and a fulcrum on which to place it, and I shall move the world.\" - Archimedes",
+                    "What form of leverage could most dramatically transform your current project?",
+                    "How can you turn your knowledge into media leverage to amplify your message?",
+                    "\"The most leveraged investment is in your own education.\" How are you investing in yourself?",
+                    "In what ways could capital leverage accelerate your path to achieving your goals?",
+                    "Who could you delegate to today, freeing up your time for higher leverage activities?",
+                    "How can automating with code create more free time and increase your output?",
+                    "\"Leverage is the ability to apply positive pressure on yourself.\" - Tony Robbins. Where can you apply more pressure?",
+                    "What network can multiply your efforts and create exponential growth?",
+                    "Which high-leverage activity, if done today, would set the stage for long-term success?",
+                    "\"Efficiency is doing better what is already being done.\" - Peter Drucker. How can you apply leverage to become more efficient?",
+                    "How could a shift in focus to more high-leverage tasks transform your productivity?"
+                ],
+                "Compound Effect": [
+                    "\"The Compound Effect is the principle of reaping huge rewards from a series of small, smart choices.\" - Darren Hardy",
+                    "What small change can you make today that will compound into a significant difference over a year?",
+                    "\"Compounding is the eighth wonder of the world. He who understands it, earns it; he who doesn't, pays it.\" - Albert Einstein",
+                    "How does the compound effect play a role in the habits you're currently cultivating?",
+                    "\"Success is the product of daily habits—not once-in-a-lifetime transformations.\" How can you apply this to your goals?",
+                    "What's one habit you could start today that, compounded over time, would significantly impact your life for the better?",
+                    "How can you leverage the compound effect in your learning and personal development?",
+                    "\"Small, seemingly insignificant steps completed consistently over time will create a radical difference.\" - Darren Hardy. What’s one small step you can commit to?",
+                    "In what area of your life have you already seen the compound effect in action?",
+                    "What's one small financial investment you can make today that could compound over time?",
+                    "How can compounding improve your relationships if applied to small acts of kindness?",
+                    "\"Patience, persistence, and perspiration make an unbeatable combination for success.\" - Napoleon Hill. How can you embody this through the compound effect?",
+                    "Reflect on a past success. How did the compound effect contribute to achieving it?"
+                ],
+                "Inversion": [
+                    "\"Invert, always invert: Turn a situation or problem upside down. Look at it backward.\" - Charlie Munger",
+                    "What might happen if you approach your current challenge from the opposite direction?",
+                    "How can thinking about how to fail help you succeed?",
+                    "\"Avoiding stupidity is easier than seeking brilliance.\" What stupidities can you avoid in your current project?",
+                    "What's the worst-case scenario of your current plan, and how can you prevent it?",
+                    "How can inverting your goals (focusing on what you don’t want) clarify your path forward?",
+                    "\"All I want to know is where I'm going to die, so I'll never go there.\" - Charlie Munger. Can you apply this principle to your decision-making?",
+                    "If the goal is to improve, what practices should you definitely not be doing?",
+                    "In what ways could your strengths be weaknesses if overused or misapplied?",
+                    "What is one habit or belief you could invert today for better results?",
+                    "How can inverting your approach to feedback (seeking out criticism instead of praise) enhance your growth?",
+                    "What would the opposite of your current strategy look like, and could it be more effective?",
+                    "When solving a problem, have you considered what you are not doing that could potentially be the solution?"
+                ],
+                "First Principles": [
+                    "\"You must boil things down to the most fundamental truths...and reason up from there.\" - Elon Musk",
+                    "What are the foundational truths of the problem you're trying to solve?",
+                    "How can breaking down assumptions into basic elements reshape your understanding?",
+                    "What would happen if you reconstructed your project from scratch, using only its most basic truths?",
+                    "In what ways have your current strategies been built on assumptions rather than first principles?",
+                    "How can applying first principles thinking illuminate new paths that were previously unseen?"
+                ],
+                "Margin of Safety": [
+                        "\"Always have a margin of safety.\" - Benjamin Graham",
+                        "How can you incorporate a buffer into your plans for unexpected events?",
+                        "Where in your life or work are you operating too close to the edge?"
+                    ],
+                    "Occam's Razor": [
+                        "\"Entities should not be multiplied unnecessarily.\" - William of Occam",
+                        "What's the simplest solution that might work?",
+                        "Are you adding complexity where simplicity would serve better?"
+                    ],
+                    "Hanlon's Razor": [
+                        "\"Never attribute to malice that which is adequately explained by neglect.\"",
+                        "Could the issue at hand be a result of oversight rather than intentional harm?",
+                        "How does assuming positive intent change your response to problems?"
+                    ],
+                    "Pareto Principle": [
+                        "\"For many events, roughly 80% of the effects come from 20% of the causes.\" - Vilfredo Pareto",
+                        "What 20% of efforts are yielding 80% of your results?",
+                        "How can you identify and focus on the most effective parts of your work?"
+                    ],
+                 "Abundance Mindset": [
+                        "\"See the world as a playground of possibilities, not a battleground of scarcities.\"",
+                        "Shift from 'not enough' to 'plenty for everyone' - how does this change your actions?"
+                    ],
+                    "Circle of Competence": [
+                        "\"Knowing what you don’t know is more useful than being brilliant.\" - Charlie Munger",
+                        "Focus on your strengths. Where can you excel further?"
+                    ],
+                    "Feedback Loops": [
+                        "\"Life is feedback. Embrace it to adapt and grow.\"",
+                        "Identify one feedback today. How can it guide your next step?"
+                    ],
+                    "Sunk Cost Fallacy": [
+                        "\"Past costs are just lessons, not life sentences. Move forward.\"",
+                        "What 'sunk cost' can you let go of today to make room for new opportunities?"
+                    ],
+                    "Growth vs. Fixed Mindset": [
+                        "\"Mindset shapes outcome. Believe in growth, and barriers become stepping stones.\"",
+                        "Think of a recent failure. How can it fuel your growth instead of defining you?"
+                    ]
+                
+                  // Add more mental models and their insights...
+              };
+
+              function fetchFounderQuote() {
+                  const founder = document.getElementById('founderSelect').value;
+                  const quotesArray = quotes[founder];
+                  if (quotesArray && quotesArray.length > 0) {
+                      const randomIndex = Math.floor(Math.random() * quotesArray.length);
+                      const selectedQuote = quotesArray[randomIndex];
+                      document.getElementById('founderBotQuote').textContent = `"${selectedQuote}" - ${founder}`;
+                  } else {
+                      document.getElementById('founderBotQuote').textContent = "Quote not found.";
+                  }
+              }
+
+              function fetchMentalModelQuote() {
+                  const model = document.getElementById('mentalModelSelect').value;
+                  const quotesArray = mentalModelQuotes[model];
+                  if (quotesArray && quotesArray.length > 0) {
+                      const randomIndex = Math.floor(Math.random() * quotesArray.length);
+                      const selectedQuote = quotesArray[randomIndex];
+                      document.getElementById('mentalModelQuote').textContent = `"${selectedQuote}"`;
+                  } else {
+                      document.getElementById('mentalModelQuote').textContent = "Insight not found.";
+                  }
+              }
+
+              function populateDropdowns() {
+                  const founderSelect = document.getElementById('founderSelect');
+                  Object.keys(quotes).forEach(founder => {
+                      const option = document.createElement('option');
+                      option.value = founder;
+                      option.textContent = founder;
+                      founderSelect.appendChild(option);
+                  });
+
+                  const modelSelect = document.getElementById('mentalModelSelect');
+                  Object.keys(mentalModelQuotes).forEach(model => {
+                      const option = document.createElement('option');
+                      option.value = model;
+                      option.textContent = model;
+                      modelSelect.appendChild(option);
+                  });
+              }
+
+              document.addEventListener('DOMContentLoaded', populateDropdowns);
+
+        function fetchFounderQuote() {
+            const founder = document.getElementById('founderSelect').value;
+            const quotesArray = quotes[founder];
+            if (quotesArray && quotesArray.length > 0) {
+                const randomIndex = Math.floor(Math.random() * quotesArray.length);
+                const selectedQuote = quotesArray[randomIndex];
+                document.getElementById('founderBotQuote').textContent = `"${selectedQuote}" - ${founder}`;
+            } else {
+                document.getElementById('founderBotQuote').textContent = "Quote not found.";
+            }
+        }
+
+              function fetchMentalModelQuote() {
+                  const model = document.getElementById('mentalModelSelect').value;
+                  const quotesArray = mentalModelQuotes[model];
+                  if (quotesArray && quotesArray.length > 0) {
+                      const randomIndex = Math.floor(Math.random() * quotesArray.length);
+                      const selectedQuote = quotesArray[randomIndex];
+                      document.getElementById('mentalModelQuote').textContent = `"${selectedQuote}"`; // This matches the ID in your HTML
+                  } else {
+                      document.getElementById('mentalModelQuote').textContent = "Insight not found.";
+                  }
+              }
+
+        function populateFounders() {
+            const select = document.getElementById('founderSelect');
+            Object.keys(quotes).forEach(founder => {
+                const option = document.createElement('option');
+                option.value = founder;
+                option.textContent = founder;
+                select.appendChild(option);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', populateFounders);
+    </script>
+</body>
+</html>

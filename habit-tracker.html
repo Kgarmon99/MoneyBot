@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker</title>
+    <link rel="stylesheet" href="habit-tracker.css">
+</head>
+<body>
+    <header>
+        <h1>Habit Tracker </h1>
+        <h2 id="goal-top-display"></h2> <!-- Display user's goal at the top -->
+        <h3 id="habit-counter"></h3> <!-- Display streak counter -->
+        <button id="reset-button">Reset Counter</button> <!-- Reset button -->
+    </header>
+
+    <main>
+        <section class="goal-setting">
+            <h2>Set Your Goal:</h2>
+            <input type="text" id="goal-input" placeholder="Your 30-day goal">
+            <button id="set-goal">Set Goal</button>
+        </section>
+
+        <section class="habit-tracker">
+            <div class="habit-circle" style="display: none;"> <!-- Initially hidden -->
+                <div class="fill"></div> <!-- The fill effect -->
+                <div class="habit-circle-text" id="goal-display">Habit Name</div>
+            </div>
+        </section>
+    </main>
+
+    <div id="celebration-animation"></div>
+
+    <script src="habit-tracker.js"></script>
+
+
+</body>
+     </footer>
+      <div class="bottom-navigation">
+          <div class="nav-box">
+              <a href="index.html">🏠</a>
+          </div>
+          <div class="nav-box">
+              <a href="comingsoon.html">📈</a>
+          </div>
+
+          <div class="nav-box">
+              <a href="Chatbot2.html">🤖</a>
+          </div>
+      </div>
+</html>

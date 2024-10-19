@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RMJ3B4R3TN"></script>
+<script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Net Worth Tracker</title>
+    <link rel="stylesheet" href="budgetbuilder.css">
+    <style>
+        /* Additional styles specific to net worth tracker */
+        .input-container {
+            margin-bottom: 20px;
+        }
+
+        .input-container label {
+            color: #00ff99;
+            font-size: 18px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .input-container input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.4);
+            color: white;
+        }
+
+        .input-container input::placeholder {
+            color: #ccc;
+        }
+
+        .input-container input:focus {
+            outline: none;
+            box-shadow: 0px 0px 5px #00ff99;
+        }
+
+        .result-container {
+            margin-top: 20px;
+        }
+
+        .result-container h2 {
+            color: #00ff99;
+            margin-bottom: 10px;
+        }
+
+        .result-container p {
+            color: white;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <img src="logo.png" alt="MoneyBot Logo" class="logo">
+            <h1 class="app-title">Net Worth Tracker</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="input-container">
+            <label for="cash">Cash & Savings:</label>
+            <input type="number" id="cash" placeholder="Enter your total cash and savings">
+        </div>
+
+        <div class="input-container">
+            <label for="investments">Investments:</label>
+            <input type="number" id="investments" placeholder="Enter your total investments">
+        </div>
+
+        <div class="input-container">
+            <label for="property">Property:</label>
+            <input type="number" id="property" placeholder="Enter the value of your property">
+        </div>
+
+        <div class="input-container">
+            <label for="loan">Loans & Debts:</label>
+            <input type="number" id="loan" placeholder="Enter your total loans and debts">
+        </div>
+
+        <button id="calculateButton" class="animated-btn">Calculate Net Worth</button>
+
+        <div class="result-container" style="display: none;">
+            <h2>Your Net Worth:</h2>
+            <p id="netWorth"></p>
+        </div>
+    </main>
+
+    <script src="networthtracker.js"></script>
+</body>
+
+</html>

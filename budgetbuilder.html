@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Budget Planner</title>
+  <link rel="stylesheet" href="budgetbuilder.css">
+</head>
+<body>
+  <header>
+    <div class="logo"></div>
+    <h1 class="app-title">Budget Planner</h1>
+  </header>
+  <div class="container">
+    <div class="select-container">
+      <label for="incomeFrequency">Income Frequency:</label>
+      <select id="incomeFrequency" class="select-field">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="quarterly">Quarterly</option>
+        <option value="biyearly">Bi-Yearly</option>
+        <option value="yearly">Yearly</option>
+      </select>
+    </div>
+    <label for="incomeAmount">Income Amount:</label>
+    <input type="number" id="incomeAmount" class="input-field" placeholder="Enter your income amount">
+    <label for="expenses">Expenses:</label>
+    <input type="number" id="expenses" class="input-field" placeholder="Enter your expenses">
+    <label for="savings">Savings Goal:</label>
+    <input type="number" id="savings" class="input-field" placeholder="Enter your savings goal">
+    <button id="calculateButton" class="animated-btn">Calculate Budget</button>
+    <div class="pie-chart">
+      <canvas id="budgetChart"></canvas>
+    </div>
+    <div class="breakdown">
+      <h3>Breakdown</h3>
+      <ul>
+        <li>Daily Income: <span id="dailyIncome">0</span></li>
+        <li>Weekly Income: <span id="weeklyIncome">0</span></li>
+        <li>Monthly Income: <span id="monthlyIncome">0</span></li>
+        <li>Quarterly Income: <span id="quarterlyIncome">0</span></li>
+        <li>Bi-Yearly Income: <span id="biyearlyIncome">0</span></li>
+        <li>Yearly Income: <span id="yearlyIncome">0</span></li>
+      </ul>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="budgetbuilder.js"></script>
+</body>
+</html>

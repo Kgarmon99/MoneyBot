@@ -1,0 +1,185 @@
+/* Add this to your habit-tracker.css file */
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #121212;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+}
+
+header h1 {
+    color: #00ff99;
+}
+
+.goal-setting {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0px 0px 10px 0px #00ff99;
+}
+
+.goal-setting h2 {
+    color: #00ff99;
+    margin-bottom: 10px;
+}
+
+.goal-setting input, .goal-setting button {
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid #00ff99;
+    background: transparent;
+    color: #00ff99;
+    margin-top: 10px;
+    width: calc(100% - 20px); /* Make input and button full width */
+    box-sizing: border-box; /* Include padding and border in width */
+}
+
+.goal-setting button {
+    cursor: pointer;
+}
+
+.goal-setting button:hover {
+    background-color: #00cc77;
+    color: #000;
+}
+
+.habit-tracker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70vh; /* Adjust the height as needed */
+}
+
+.habit-circle {
+    width: 200px;
+    height: 200px;
+    border: 5px solid #00ff99;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+    cursor: pointer;
+    overflow: hidden; /* Hide overflowing fill */
+    position: relative; /* Position relative for absolute positioning of the fill */
+}
+
+.habit-circle.active .fill {
+    transform: scaleY(1); /* Fill animation to scale from 0 to 1 */
+}
+
+.fill {
+    position: absolute;
+    top: 100%; /* Initially set fill below the circle */
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #00ff99;
+    transform-origin: bottom; /* Fill animation from bottom to top */
+    transform: scaleY(0); /* Initially set to no fill */
+    transition: transform 1.5s ease-in-out; /* Adjust transition timing as needed */
+}
+
+.habit-circle-text {
+    color: #fff;
+    font-size: 1.5rem;
+}
+
+#goal-display {
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #00ff99;
+}
+
+.progress-bar {
+    width: 100%;
+    background-color: #ddd;
+    border-radius: 20px;
+    margin: 20px auto;
+}
+
+#progress-bar-fill {
+    height: 20px;
+    background-color: #00ff99;
+    width: 0%; /* Dynamically updated */
+    border-radius: 20px;
+    transition: width 0.5s ease-in-out;
+}
+
+.motivational-quote {
+    margin: 20px auto;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Bottom Navigation */
+  .bottom-navigation {
+      background-color: rgba(0, 255, 153, 0.2);
+      backdrop-filter: blur(10px);
+      width: 100%;
+      position: fixed;
+      bottom: 0;
+      display: flex;
+      justify-content: space-around;
+      padding: 15px 0;
+      z-index: 100;
+      border-top: 2px solid #00ff99;
+  }
+
+  .nav-box {
+      background-color: #333;
+      border: 2px solid #00ff99;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0, 255, 153, 0.3);
+      transition: all 0.3s ease;
+  }
+
+  .nav-box:hover {
+      box-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
+      transform: translateY(-5px);
+  }
+
+  .nav-box a {
+      color: #00ff99;
+      text-decoration: none;
+      font-weight: bold;
+  }
+
+
+/* Celebration Animation */
+.celebration-animation {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 5em; /* Increase font size for bigger celebration */
+    z-index: 9999; /* Ensure the animation appears on top */
+}
+
+/* CSS for Streak Buttons */
+
+.streak-buttons {
+    margin-top: 20px;
+}
+
+.streak-buttons button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: 2px solid #00ff99;
+    background: transparent;
+    color: #00ff99;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.streak-buttons button:hover {
+    background-color: #00cc77;
+    color: #000;
+}
