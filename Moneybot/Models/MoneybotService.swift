@@ -93,7 +93,8 @@ class MoneybotService: ObservableObject {
         
         // Get the API key from environment or info.plist
         // In a real app, you'd store this securely using Keychain
-        let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
+        // Replace "YOUR_OPENAI_API_KEY" with your actual OpenAI API key when testing the app
+        let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? "YOUR_OPENAI_API_KEY"
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         
         request.httpBody = jsonData
