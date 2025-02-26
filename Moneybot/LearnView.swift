@@ -15,6 +15,7 @@ struct LearnView: View {
         case audio
         case quotes
         case tips
+        case moneybot
     }
     
     let audioContent = [
@@ -58,7 +59,7 @@ struct LearnView: View {
     var currentContent: some View {
         Group {
             switch contentType {
-            case .tips:
+            case .moneybot:
                 VStack {
                     TipCard(tip: tips[currentTipIndex % tips.count])
                     NavigationControls(currentIndex: $currentTipIndex, totalItems: tips.count)
@@ -90,7 +91,7 @@ struct LearnView: View {
                     AudioCard(audio: audioContent[currentTipIndex % audioContent.count])
                     NavigationControls(currentIndex: $currentTipIndex, totalItems: audioContent.count)
                 }
-            case .tips:
+            case .moneybot:
                 VStack {
                     TipCard(tip: tips[currentTipIndex % tips.count])
                     NavigationControls(currentIndex: $currentTipIndex, totalItems: tips.count)
@@ -150,6 +151,7 @@ struct LearnView: View {
                     Text("Audio").tag(ContentType.audio)
                     Text("Quotes").tag(ContentType.quotes)
                     Text("Tips").tag(ContentType.tips)
+                    Text("Moneybot").tag(ContentType.moneybot)
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal)
