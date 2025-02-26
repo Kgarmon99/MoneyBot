@@ -1,0 +1,514 @@
+import SwiftUI
+import CoreData
+
+struct ContentView: View {
+    @State private var user: User = {
+        let (savedStreak, lastActiveDate) = User.loadSavedStreak()
+        return User(level: 1, xp: 150, streak: savedStreak, lastActiveDate: lastActiveDate)
+    }()
+    @State private var showChallengePicker = false
+    @State private var showFinanceLesson = false
+    @State private var selectedTab = 0
+
+    init() {
+        UINavigationBar.appearance().tintColor = .green
+    }
+
+    let primaryGreen = Color(red: 0.2, green: 0.8, blue: 0.4)
+    let secondaryGreen = Color(red: 0.1, green: 0.7, blue: 0.3)
+    let glowGreen = Color(red: 0.0, green: 1.0, blue: 0.0)
+    let gradientStart = Color(red: 0.98, green: 1.0, blue: 0.99)
+    let gradientEnd = Color(red: 0.94, green: 0.98, blue: 0.96)
+    let cardBackground = Color(red: 1.0, green: 1.0, blue: 1.0).opacity(0.95)
+
+    var body: some View {
+        ZStack {
+            LinearGradient(gradient: Gradient(colors: [gradientStart, gradientEnd]),
+                          startPoint: .top,
+                          endPoint: .bottom)
+                .edgesIgnoringSafeArea(.all)
+
+            VStack(spacing: 24) {
+                // Header
+                HStack(spacing: 16) {
+                    StreakBadge(streak: user.streak)
+                    Spacer()
+                    Image("new-moneybot-logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 45)
+                    Spacer()
+                    LevelCircle(level: user.level, xp: user.xp)
+                }
+                .padding(.horizontal)
+                .padding(.top)
+
+                Spacer()
+                    .frame(height: 20)
+
+                // Daily Challenge
+                VStack(spacing: 12) {
+                    Text("Daily Challenge")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(primaryGreen)
+
+                    if user.dailyChallenge.isEmpty {
+                        Button(action: {
+                            showChallengePicker = true
+                        }) {
+                            HStack {
+                                Text("Set Challenge")
+                                    .fontWeight(.semibold)
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                            .background(primaryGreen)
+                            .cornerRadius(20)
+                            .shadow(color: glowGreen.opacity(0.3), radius: 10, x: 0, y: 0)
+                        }
+                    } else {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(user.dailyChallenge)
+                                .font(.body)
+                                .foregroundColor(.black)
+                            Button(action: {
+                                user.completeChallenge()
+                            }) {
+                                Text("Complete")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 40)
+                                    .background(primaryGreen)
+                                    .cornerRadius(20)
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 20)
+                .background(cardBackground)
+                .cornerRadius(24)
+                .shadow(color: glowGreen.opacity(0.2), radius: 15, x: 0, y: 4)
+                .padding(.horizontal, 16)
+                .sheet(isPresented: $showChallengePicker) {
+                    ChallengePicker(user: $user, isPresented: $showChallengePicker)
+                }
+
+                Spacer()
+                    .frame(height: 30)
+
+                // Quick Actions
+                VStack(spacing: 16) {
+                    QuickActionCard(
+                        title: "Learn",
+                        subtitle: "Start your journey",
+                        icon: "brain.head.profile",
+                        reward: "+50 XP",
+                        action: { showFinanceLesson = true }
+                    )
+                    .onTapGesture {
+                        showFinanceLesson = true
+                    }
+                    .sheet(isPresented: $showFinanceLesson) {
+                        LearnView(user: $user)
+                    }
+
+                    NavigationLink(destination: ProgressView(user: $user)) {
+                        QuickActionCard(
+                            title: "Progress",
+                            subtitle: "Track your journey",
+                            icon: "chart.line.uptrend.xyaxis",
+                            reward: "Level Up!"
+                        )
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                .padding(.horizontal)
+
+                Spacer()
+
+                // Navigation Bar
+                CustomTabBar(selectedTab: $selectedTab, showFinanceLesson: $showFinanceLesson)
+            }
+        }
+    }
+}
+
+struct LevelCircle: View {
+    let level: Int
+    let xp: Int
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(Color.green.opacity(0.1))
+                .frame(width: 60, height: 60)
+
+            Circle()
+                .stroke(Color.green.opacity(0.2), lineWidth: 5)
+                .frame(width: 60, height: 60)
+
+            Circle()
+                .trim(from: 0, to: CGFloat(xp) / 200)
+                .stroke(
+                    LinearGradient(
+                        colors: [Color.green, Color.green.opacity(0.7)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    style: StrokeStyle(lineWidth: 5, lineCap: .round)
+                )
+                .frame(width: 60, height: 60)
+                .rotationEffect(.degrees(-90))
+                .shadow(color: Color.green.opacity(0.5), radius: 8, x: 0, y: 0)
+                .overlay(
+                    Circle()
+                        .stroke(Color.white, lineWidth: 2)
+                        .frame(width: 52, height: 52)
+                )
+
+            VStack(spacing: -2) {
+                Text("LV")
+                    .font(.system(size: 14, weight: .black))
+                    .foregroundColor(.green)
+                Text("\(level)")
+                    .font(.system(size: 20, weight: .heavy))
+                    .foregroundColor(.green)
+            }
+        }
+    }
+}
+
+struct StreakBadge: View {
+    let streak: Int
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "flame.fill")
+                .font(.system(size: 20))
+                .foregroundColor(.orange)
+            Text("\(streak)")
+                .font(.system(size: 18, weight: .heavy))
+                .foregroundColor(.orange)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.white)
+                .shadow(color: Color.orange.opacity(0.3), radius: 8, x: 0, y: 4)
+        )
+    }
+}
+
+struct RewardBadge: View {
+    let icon: String
+    let value: String
+    let label: String
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Image(systemName: icon)
+                .foregroundColor(.orange)
+            Text(value)
+                .font(.system(size: 14, weight: .bold))
+            Text(label)
+                .font(.system(size: 12))
+                .foregroundColor(.gray)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color.orange.opacity(0.1))
+        .cornerRadius(12)
+    }
+}
+
+struct QuickActionCard: View {
+    let title: String
+    let subtitle: String
+    let icon: String
+    let reward: String
+    let glowGreen = Color(red: 0.0, green: 1.0, blue: 0.0)
+    var action: (() -> Void)? = nil
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: icon)
+                        .font(.system(size: 24))
+                        .foregroundColor(.green)
+                    Spacer()
+                }
+
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.black)
+
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+
+                Text(reward)
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+            .cornerRadius(20)
+            .shadow(color: glowGreen.opacity(0.3), radius: 10, x: 0, y: 0) //Added glow
+    }
+}
+
+struct CustomTabBar: View {
+    @Binding var selectedTab: Int
+    @Binding var showFinanceLesson: Bool
+
+    var body: some View {
+        HStack {
+            Button(action: { selectedTab = 0 }) {
+                Image(systemName: "house.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(selectedTab == 0 ? .green : .gray)
+                    .frame(maxWidth: .infinity)
+            }
+
+            Button(action: { showFinanceLesson = true }) {
+                Image(systemName: "brain.head.profile")
+                    .font(.system(size: 20))
+                    .foregroundColor(selectedTab == 1 ? .green : .gray)
+                    .frame(maxWidth: .infinity)
+            }
+
+            Button(action: { selectedTab = 2 }) {
+                Image(systemName: "trophy.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(selectedTab == 2 ? .green : .gray)
+                    .frame(maxWidth: .infinity)
+            }
+
+            NavigationLink(destination: ProgressView(user: $user), isActive: Binding(
+                get: { selectedTab == 3 },
+                set: { if $0 { selectedTab = 3 } }
+            )) {
+                Image(systemName: "chart.line.uptrend.xyaxis.circle.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(selectedTab == 3 ? .green : .gray)
+                    .frame(maxWidth: .infinity)
+            }
+
+            Button(action: { selectedTab = 4 }) {
+                Image(systemName: "person.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(selectedTab == 4 ? .green : .gray)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.vertical, 8)
+        .background(Color.white)
+        .cornerRadius(25)
+        .padding(.horizontal)
+        .padding(.bottom, 8)
+    }
+}
+
+struct User: Identifiable {
+    let id = UUID()
+    var level: Int
+    var xp: Int
+    var streak: Int
+    var lastActiveDate: Date?
+    var dailyChallenge: String = ""
+    var achievements: [Achievement] = [
+        Achievement(title: "First Goal", description: "Set your first financial goal", icon: "flag.fill", unlocked: true),
+        Achievement(title: "Streak Master", description: "Maintain a 7-day streak", icon: "flame.fill", unlocked: false),
+        Achievement(title: "Saver", description: "Save $100", icon: "dollarsign.circle.fill", unlocked: false)
+    ]
+    var activeGoals: [UserGoal] = []
+
+    mutating func setChallenge(_ challenge: String) {
+        dailyChallenge = challenge
+    }
+
+    mutating func completeChallenge() {
+        xp += 100
+        if xp >= 200 {
+            level += 1
+            xp = xp - 200
+        }
+        updateStreak()
+        dailyChallenge = ""
+    }
+
+    private mutating func updateStreak() {
+        let calendar = Calendar.current
+        let today = Date()
+
+        if let lastActive = lastActiveDate {
+            let daysSinceLastActive = calendar.dateComponents([.day], from: calendar.startOfDay(for: lastActive), to: calendar.startOfDay(for: today)).day ?? 0
+
+            if daysSinceLastActive == 1 {
+                // User was active yesterday, increment streak
+                streak += 1
+            } else if daysSinceLastActive > 1 {
+                // User missed a day, reset streak
+                streak = 1
+            }
+            // If daysSinceLastActive == 0, user already active today, don't change streak
+        } else {
+            // First time user is active
+            streak = 1
+        }
+
+        lastActiveDate = today
+        UserDefaults.standard.set(lastActiveDate, forKey: "lastActiveDate")
+        UserDefaults.standard.set(streak, forKey: "userStreak")
+    }
+
+    static func loadSavedStreak() -> (Int, Date?) {
+        let savedStreak = UserDefaults.standard.integer(forKey: "userStreak")
+        let savedDate = UserDefaults.standard.object(forKey: "lastActiveDate") as? Date
+        return (savedStreak == 0 ? 1 : savedStreak, savedDate)
+    }
+}
+
+struct ChallengePicker: View {
+    @Binding var user: User
+    @Binding var isPresented: Bool
+    @State private var selectedCategory: ChallengeCategory = .saving
+
+    let challenges: [Challenge] = [
+        Challenge(title: "Save $5", description: "Put $5 into your savings account", category: .saving, xpReward: 50, difficultyLevel: .easy),
+        Challenge(title: "Track Expenses", description: "Log all your expenses for the day", category: .budgeting, xpReward: 75, difficultyLevel: .medium),
+        Challenge(title: "Research ETFs", description: "Learn about ETF investing for 15 minutes", category: .investing, xpReward: 100, difficultyLevel: .medium),
+        Challenge(title: "Create Budget", description: "Set up a basic monthly budget", category: .budgeting, xpReward: 150, difficultyLevel: .hard),
+        Challenge(title: "Emergency Fund", description: "Start an emergency fund with any amount", category: .saving, xpReward: 100, difficultyLevel: .medium),
+    ]
+
+    var filteredChallenges: [Challenge] {
+        challenges.filter { $0.category == selectedCategory }
+    }
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                // Category Picker
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 15) {
+                        ForEach(ChallengeCategory.allCases, id: \.self) { category in
+                            CategoryButton(
+                                category: category,
+                                isSelected: selectedCategory == category,
+                                action: { selectedCategory = category }
+                            )
+                        }
+                    }
+                    .padding()
+                }
+
+                // Challenges List
+                ScrollView {
+                    LazyVStack(spacing: 15) {
+                        ForEach(filteredChallenges) { challenge in
+                            ChallengeCard(challenge: challenge) {
+                                user.setChallenge(challenge.title)
+                                isPresented = false
+                            }
+                        }
+                    }
+                    .padding()
+                }
+            }
+            .navigationTitle("Daily Challenges")
+            .navigationBarItems(trailing: Button("Cancel") {
+                isPresented = false
+            })
+        }
+    }
+}
+
+struct CategoryButton: View {
+    let category: ChallengeCategory
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(category.rawValue)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(isSelected ? Color.green : Color.gray.opacity(0.1))
+                .foregroundColor(isSelected ? .white : .primary)
+                .cornerRadius(20)
+        }
+    }
+}
+
+struct ChallengeCard: View {
+    let challenge: Challenge
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text(challenge.title)
+                        .font(.headline)
+                    Spacer()
+                    Text("+\(challenge.xpReward) XP")
+                        .font(.subheadline)
+                        .foregroundColor(.green)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.green.opacity(0.1))
+                        .cornerRadius(8)
+                }
+
+                Text(challenge.description)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                HStack {
+                    Text(challenge.category.rawValue)
+                        .font(.caption)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.blue.opacity(0.1))
+                        .foregroundColor(.blue)
+                        .cornerRadius(8)
+
+                    Text(challenge.difficultyLevel.rawValue)
+                        .font(.caption)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            challenge.difficultyLevel == .easy ? Color.green.opacity(0.1) :
+                            challenge.difficultyLevel == .medium ? Color.orange.opacity(0.1) :
+                            Color.red.opacity(0.1)
+                        )
+                        .foregroundColor(
+                            challenge.difficultyLevel == .easy ? .green :
+                            challenge.difficultyLevel == .medium ? .orange :
+                            .red
+                        )
+                        .cornerRadius(8)
+                }
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.white)
+            .cornerRadius(15)
+            .shadow(color: Color.black.opacity(0.05), radius: 5)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+#Preview {
+    ContentView()
+}

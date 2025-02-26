@@ -1,15 +1,15 @@
-modules = ["nodejs-20", "web", "postgresql-16"]
-run = "npm run dev"
-hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
+modules = ["swift-5.8"]
 
 [nix]
 channel = "stable-24_05"
 
-[deployment]
-deploymentTarget = "cloudrun"
-build = ["npm", "run", "build"]
-run = ["npm", "run", "start"]
+[workflows]
+runButton = "Build and Run"
 
-[[ports]]
-localPort = 5000
-externalPort = 80
+[[workflows.workflow]]
+name = "Build and Run"
+author = 19629497
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "swift build"

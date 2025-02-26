@@ -1,0 +1,678 @@
+import SwiftUI
+
+struct ProgressView: View {
+    @Binding var user: User
+    @State private var selectedGoal: FinancialGoal?
+    @State private var showingAddGoal = false
+    @State private var customGoalAmount: String = ""
+    @State private var customGoalTitle: String = ""
+    @State private var customGoalPeriod: GoalPeriod = .week
+
+    enum GoalPeriod: String, CaseIterable {
+        case week = "Weekly"
+        case month = "Monthly"
+        case year = "Yearly"
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                // Stats Overview
+                VStack(spacing: 12) {
+                    Text("Your Progress")
+                        .font(.title2)
+                        .fontWeight(.bold)
+
+                    HStack(spacing: 20) {
+                        StatCard(title: "Current Streak", value: "\(user.streak)", icon: "flame.fill", color: .orange)
+                        StatCard(title: "Level", value: "\(user.level)", icon: "star.fill", color: .yellow)
+                    }
+
+                    StatCard(title: "XP Progress", value: "\(user.xp)/200", icon: "chart.bar.fill", color: .green)
+                }
+                .padding()
+
+                // Achievements Section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Achievements")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .padding(.horizontal)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 16) {
+                            ForEach(user.achievements) { achievement in
+                                AchievementCard(achievement: achievement)
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+
+                // Active Goals Section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Active Goals")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .padding(.horizontal)
+
+                    if user.activeGoals.isEmpty {
+                        Text("No active goals yet. Create one to get started!")
+                            .foregroundColor(.secondary)
+                            .padding()
+                    } else {
+                        ForEach(user.activeGoals.indices, id: \.self) { index in
+                            GoalProgressCard(goal: $user.activeGoals[index])
+                                .padding(.horizontal)
+                        }
+                    }
+                }
+
+                // Add New Goal Button
+                Button(action: { showingAddGoal = true }) {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Add New Goal")
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(Color.green)
+                    .cornerRadius(25)
+                    .padding(.horizontal)
+                }
+            }
+            .padding(.vertical)
+        }
+        .background(Color(UIColor.systemBackground))
+        .sheet(isPresented: $showingAddGoal) {
+            AddGoalSheet(user: $user, isPresented: $showingAddGoal)
+        }
+    }
+}
+
+struct AddGoalSheet: View {
+    @Binding var user: User
+    @Binding var isPresented: Bool
+    @State private var goalTitle = ""
+    @State private var goalAmount = ""
+    @State private var selectedPeriod: ProgressView.GoalPeriod = .week
+    @State private var animateSuccess = false
+    @State private var selectedEmoji = "🎯"
+    
+    let emojis = ["🎯", "💰", "🚀", "💎", "🏆", "✨", "💪", "🎮", "📱", "💻"]
+    
+    var isValidGoal: Bool {
+        !goalTitle.isEmpty && Double(goalAmount) != nil
+    }
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                // Emoji Selector
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 15) {
+                        ForEach(emojis, id: \.self) { emoji in
+                            Text(emoji)
+                                .font(.system(size: 40))
+                                .padding(10)
+                                .background(selectedEmoji == emoji ? Color.green.opacity(0.2) : Color.clear)
+                                .cornerRadius(15)
+                                .scaleEffect(selectedEmoji == emoji ? 1.2 : 1.0)
+                                .onTapGesture {
+                                    withAnimation(.spring()) {
+                                        selectedEmoji = emoji
+                                    }
+                                }
+                        }
+                    }
+                    .padding()
+                }
+                
+                VStack(spacing: 25) {
+                    // Title Input
+                    VStack(alignment: .leading) {
+                        Text("What's your goal?")
+                            .font(.headline)
+                            .foregroundColor(.green)
+                        TextField("Dream Gaming Setup, New iPhone, etc.", text: $goalTitle)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal)
+                    }
+                    
+                    // Amount Input
+                    VStack(alignment: .leading) {
+                        Text("How much do you need?")
+                            .font(.headline)
+                            .foregroundColor(.green)
+                        HStack {
+                            Text("$")
+                                .font(.title2)
+                            TextField("Amount", text: $goalAmount)
+                                .keyboardType(.decimalPad)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                        }
+                        .padding(.horizontal)
+                    }
+                    
+                    // Period Selector
+                    VStack(alignment: .leading) {
+                        Text("Timeline")
+                            .font(.headline)
+                            .foregroundColor(.green)
+                        Picker("", selection: $selectedPeriod) {
+                            ForEach(ProgressView.GoalPeriod.allCases, id: \.self) { period in
+                                Text(period.rawValue).tag(period)
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                        .padding(.horizontal)
+                    }
+                }
+                .padding()
+                
+                // Create Button
+                Button(action: {
+                    if isValidGoal {
+                        withAnimation(.spring()) {
+                            animateSuccess = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            let newGoal = UserGoal(
+                                title: "\(selectedEmoji) \(goalTitle)",
+                                targetAmount: Double(goalAmount) ?? 0,
+                                period: selectedPeriod,
+                                currentAmount: 0
+                            )
+                            user.activeGoals.append(newGoal)
+                            isPresented = false
+                        }
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Create Goal")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(isValidGoal ? Color.green : Color.gray)
+                    .cornerRadius(25)
+                    .scaleEffect(animateSuccess ? 1.1 : 1.0)
+                }
+                .padding(.horizontal)
+                .disabled(!isValidGoal)
+            }
+            .navigationTitle("New Goal")
+            .navigationBarItems(leading: Button("Cancel") { isPresented = false })
+            .background(Color(UIColor.systemBackground))
+        }
+    }
+}
+
+struct StatCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+
+    @State private var isHovered = false
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 30))
+                .foregroundColor(color)
+                .scaleEffect(isHovered ? 1.05 : 1.0)
+                .animation(.easeInOut(duration: 0.3), value: isHovered)
+                .onAppear { 
+                    withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
+                        isHovered.toggle()
+                    }
+                }
+
+            Text(value)
+                .font(.title2)
+                .fontWeight(.bold)
+
+            Text(title)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(color: Color.green.opacity(0.2), radius: 15, x: 0, y: 4)
+        .overlay(
+            RoundedRectangle(cornerRadius: 15)
+                .stroke(Color.green.opacity(0.1), lineWidth: 1)
+        )
+    }
+}
+
+struct AchievementCard: View {
+    let achievement: Achievement
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: achievement.icon)
+                .font(.system(size: 24))
+                .foregroundColor(achievement.unlocked ? .green : .gray)
+
+            Text(achievement.title)
+                .font(.caption)
+                .multilineTextAlignment(.center)
+
+            if achievement.unlocked {
+                Text("Unlocked!")
+                    .font(.caption2)
+                    .foregroundColor(.green)
+            }
+        }
+        .frame(width: 90, height: 90)
+        .padding(12)
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(color: Color.black.opacity(0.1), radius: 5)
+    }
+}
+
+struct GoalProgressCard: View {
+    @Binding var goal: UserGoal
+    @State private var showingDetails = false
+    @State private var newAmount = ""
+    @State private var transactionNote = ""
+    
+    var progress: Double {
+        min(goal.currentAmount / goal.targetAmount, 1.0)
+    }
+    
+    var nextMilestone: Milestone? {
+        goal.milestones.first { !$0.isCompleted }
+    }
+    
+    var timeRemaining: String {
+        let calendar = Calendar.current
+        let components: Set<Calendar.Component> = [.day]
+        let start = goal.startDate
+        var targetDate: Date
+        
+        switch goal.period {
+        case .week:
+            targetDate = calendar.date(byAdding: .day, value: 7, to: start) ?? start
+        case .month:
+            targetDate = calendar.date(byAdding: .month, value: 1, to: start) ?? start
+        case .year:
+            targetDate = calendar.date(byAdding: .year, value: 1, to: start) ?? start
+        }
+        
+        let remaining = calendar.dateComponents(components, from: Date(), to: targetDate)
+        return "\(remaining.day ?? 0) days"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Button(action: { showingDetails.toggle() }) {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text(goal.title)
+                            .font(.headline)
+                        Spacer()
+                        Text(goal.period.rawValue)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+
+                    ProgressBar(progress: progress)
+
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text("$\(Int(goal.currentAmount))")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                            Text("of $\(Int(goal.targetAmount))")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        VStack(alignment: .trailing) {
+                            Text(timeRemaining)
+                                .font(.subheadline)
+                                .foregroundColor(.green)
+                            if let milestone = nextMilestone {
+                                Text(milestone.title)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(color: Color.black.opacity(0.1), radius: 5)
+        .sheet(isPresented: $showingDetails) {
+            NavigationView {
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Hero Section with Animated Progress
+                        ZStack {
+                            Circle()
+                                .stroke(Color.gray.opacity(0.2), lineWidth: 20)
+                                .frame(width: 200, height: 200)
+                            
+                            Circle()
+                                .trim(from: 0, to: progress)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [.green, .blue],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    style: StrokeStyle(lineWidth: 20, lineCap: .round)
+                                )
+                                .frame(width: 200, height: 200)
+                                .rotationEffect(.degrees(-90))
+                                .animation(.spring(), value: progress)
+                            
+                            VStack(spacing: 4) {
+                                Text("$\(Int(goal.currentAmount))")
+                                    .font(.system(size: 32, weight: .bold))
+                                    .foregroundColor(.primary)
+                                Text("of $\(Int(goal.targetAmount))")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding(.top)
+                        
+                        // Insights Card
+                        VStack(spacing: 16) {
+                            Text("Goal Insights")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            HStack(spacing: 20) {
+                                InsightCard(
+                                    title: "Avg. Contribution",
+                                    value: "$\(Int(goal.averageContribution))",
+                                    icon: "chart.bar.fill",
+                                    color: .blue
+                                )
+                                
+                                InsightCard(
+                                    title: "Est. Completion",
+                                    value: goal.estimatedCompletionDate.formatted(date: .abbreviated, time: .omitted),
+                                    icon: "calendar",
+                                    color: .purple
+                                )
+                            }
+                            
+                            if goal.progressRate > 0 {
+                                Text(goal.progressRate > 1 ? "You're ahead of schedule! 🚀" : "Keep pushing! 💪")
+                                    .font(.subheadline)
+                                    .foregroundColor(goal.progressRate > 1 ? .green : .orange)
+                            }
+                        }
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(15)
+                        .shadow(color: Color.black.opacity(0.05), radius: 10)
+                        
+                        // Add Progress Card
+                        VStack(spacing: 16) {
+                            Text("Add Progress")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            HStack(spacing: 12) {
+                                TextField("$", text: $newAmount)
+                                    .keyboardType(.decimalPad)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .frame(width: 100)
+                                
+                                TextField("What's this for?", text: $transactionNote)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                
+                                Button(action: {
+                                    if let amount = Double(newAmount) {
+                                        withAnimation(.spring()) {
+                                            let transaction = Transaction(amount: amount, date: Date(), note: transactionNote)
+                                            goal.transactions.append(transaction)
+                                            goal.currentAmount += amount
+                                            
+                                            // Update milestones with animation
+                                            for index in goal.milestones.indices {
+                                                if goal.currentAmount >= goal.milestones[index].targetAmount {
+                                                    withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                                                        goal.milestones[index].isCompleted = true
+                                                    }
+                                                }
+                                            }
+                                            
+                                            newAmount = ""
+                                            transactionNote = ""
+                                        }
+                                    }
+                                }) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.system(size: 24))
+                                        .foregroundColor(.green)
+                                }
+                                .disabled(newAmount.isEmpty)
+                            }
+                        }
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(15)
+                        .shadow(color: Color.black.opacity(0.05), radius: 10)
+                        
+                        // Milestones Journey
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Achievement Journey")
+                                .font(.headline)
+                            
+                            ForEach(goal.milestones) { milestone in
+                                HStack(spacing: 16) {
+                                    Circle()
+                                        .fill(milestone.isCompleted ? Color.green : Color.gray.opacity(0.3))
+                                        .frame(width: 40, height: 40)
+                                        .overlay(
+                                            Image(systemName: milestone.isCompleted ? "checkmark" : "lock")
+                                                .foregroundColor(.white)
+                                        )
+                                        .shadow(color: milestone.isCompleted ? Color.green.opacity(0.3) : .clear, radius: 5)
+                                    
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(milestone.title)
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                        Text("$\(Int(milestone.targetAmount))")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    if milestone.isCompleted {
+                                        Image(systemName: "star.fill")
+                                            .foregroundColor(.yellow)
+                                            .shadow(color: .yellow.opacity(0.3), radius: 5)
+                                    }
+                                }
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(15)
+                                .shadow(color: Color.black.opacity(0.05), radius: 5)
+                            }
+                        }
+                        .padding()
+                        
+                        // Recent Activity
+                        if !goal.transactions.isEmpty {
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("Recent Activity")
+                                    .font(.headline)
+                                
+                                ForEach(goal.transactions.prefix(5).reversed()) { transaction in
+                                    HStack(spacing: 16) {
+                                        Circle()
+                                            .fill(Color.green.opacity(0.1))
+                                            .frame(width: 40, height: 40)
+                                            .overlay(
+                                                Image(systemName: "arrow.up.circle.fill")
+                                                    .foregroundColor(.green)
+                                            )
+                                        
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("+$\(Int(transaction.amount))")
+                                                .font(.subheadline)
+                                                .fontWeight(.semibold)
+                                            Text(transaction.note)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        Text(transaction.date, style: .date)
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(15)
+                                    .shadow(color: Color.black.opacity(0.05), radius: 5)
+                                }
+                            }
+                            .padding()
+                        }
+                    }
+                }
+                .background(Color(UIColor.systemGroupedBackground))
+                .navigationTitle(goal.title)
+                .navigationBarItems(
+                    leading: Menu {
+                        Button(action: {
+                            showingDetails = false
+                            if let index = user.activeGoals.firstIndex(where: { $0.id == goal.id }) {
+                                user.activeGoals.remove(at: index)
+                            }
+                        }) {
+                            Label("Delete Goal", systemImage: "trash")
+                                .foregroundColor(.red)
+                        }
+                        
+                        Button(action: {
+                            isEditing.toggle()
+                        }) {
+                            Label("Edit Goal", systemImage: "pencil")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    },
+                    trailing: Button("Done") { showingDetails = false }
+                )
+                .sheet(isPresented: $isEditing) {
+                    EditGoalSheet(goal: $goal)
+                }
+            }
+        }
+    }
+}
+
+struct ProgressBar: View {
+    let progress: Double
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(height: 8)
+                    .cornerRadius(4)
+
+                Rectangle()
+                    .fill(Color.green)
+                    .frame(width: geometry.size.width * progress, height: 8)
+                    .cornerRadius(4)
+            }
+        }
+        .frame(height: 8)
+    }
+}
+
+struct InsightCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(color)
+            
+            Text(value)
+                .font(.system(size: 16, weight: .bold))
+            
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(color.opacity(0.1))
+        .cornerRadius(12)
+    }
+}
+struct EditGoalSheet: View {
+    @Binding var goal: UserGoal
+    @Environment(\.dismiss) var dismiss
+    @State private var editedTitle: String
+    @State private var editedAmount: String
+    @State private var editedDate: Date
+    
+    init(goal: Binding<UserGoal>) {
+        _goal = goal
+        _editedTitle = State(initialValue: goal.wrappedValue.title)
+        _editedAmount = State(initialValue: String(goal.wrappedValue.targetAmount))
+        _editedDate = State(initialValue: goal.wrappedValue.targetCompletionDate)
+    }
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Goal Details")) {
+                    TextField("Goal Title", text: $editedTitle)
+                    
+                    TextField("Target Amount", text: $editedAmount)
+                        .keyboardType(.decimalPad)
+                    
+                    DatePicker("Target Completion Date",
+                              selection: $editedDate,
+                              in: Date()...,
+                              displayedComponents: .date)
+                }
+            }
+            .navigationTitle("Edit Goal")
+            .navigationBarItems(
+                leading: Button("Cancel") { dismiss() },
+                trailing: Button("Save") {
+                    if let amount = Double(editedAmount) {
+                        goal.title = editedTitle
+                        goal.targetAmount = amount
+                        goal.targetCompletionDate = editedDate
+                        dismiss()
+                    }
+                }
+            )
+        }
+    }
+}
