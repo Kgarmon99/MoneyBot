@@ -1,15 +1,15 @@
-import {
-  ChatCompletionRequest,
-  ChatCompletionResponse,
-  FinancialAdviceRequest
-} from '../../shared/schema';
+import OpenAI from "openai";
 
-// Interface definitions for API interactions
+// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+export const OPENAI_MODEL = "gpt-4o";
+
+// Message type for OpenAI API
 export interface Message {
   role: "system" | "user" | "assistant";
   content: string;
 }
 
+// Error response interface
 export interface ErrorResponse {
   error: {
     code: string;
@@ -19,30 +19,29 @@ export interface ErrorResponse {
   };
 }
 
-export interface MessagesResponse {
-  data: {
-    id: number;
-    userId: number;
-    role: string;
-    content: string;
-    timestamp: string;
-    model: string;
-    conversationId: string;
-  }[];
-  meta: {
-    total: number;
-    conversation_id?: string;
+// Chat completion request interface
+export interface ChatCompletionRequest {
+  messages: Message[];
+  model?: string;
+  temperature?: number;
+  max_tokens?: number;
+  conversation_id?: string;
+}
+
+// Financial advice request interface
+export interface FinancialAdviceRequest {
+  topic?: string;
+  question: string;
+  userContext?: {
+    experience?: string;
+    age?: number;
+    hasDebt?: boolean;
+    hasInvestments?: boolean;
+    monthlyIncome?: number;
   };
 }
 
-export interface ModelResponse {
-  data: {
-    id: string;
-    name: string;
-    description: string;
-  }[];
-}
-
+// Financial advice response interface
 export interface FinancialAdviceResponse {
   advice: string;
   topic?: string;
@@ -50,101 +49,56 @@ export interface FinancialAdviceResponse {
   model: string;
 }
 
-// Base URL for API endpoints
-const API_BASE_URL = '/api';
-
-// Helper function for making API requests
-const apiRequest = async <T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> => {
-  const defaultHeaders = {
-    'Content-Type': 'application/json',
-  };
-
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...options.headers,
-    },
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw data;
-  }
-
-  return data;
-};
-
-// API functions for OpenAI interactions
+// Initialize the OpenAI client
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 /**
- * Send a chat completion request to the API
+ * Send a chat completion request to the OpenAI API
  */
 export const sendChatCompletion = async (
-  request: ChatCompletionRequest
-): Promise<ChatCompletionResponse> => {
-  return apiRequest<ChatCompletionResponse>('/chat/completions', {
+  request: ChatCompletionRequest,
+  options: RequestInit = {}
+) => {
+  const response = await fetch('/api/chat/completions', {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(request),
+    ...options,
   });
-};
 
-/**
- * Get available AI models
- */
-export const getModels = async (): Promise<ModelResponse> => {
-  return apiRequest<ModelResponse>('/models');
-};
+  if (!response.ok) {
+    const errorData: ErrorResponse = await response.json();
+    throw new Error(errorData.error.message || 'Failed to get chat completion');
+  }
 
-/**
- * Get message history, optionally filtered by conversation ID
- */
-export const getMessages = async (conversationId?: string): Promise<MessagesResponse> => {
-  const endpoint = conversationId
-    ? `/messages?conversation_id=${conversationId}`
-    : '/messages';
-  
-  return apiRequest<MessagesResponse>(endpoint);
-};
-
-/**
- * Get all conversations
- */
-export const getConversations = async () => {
-  return apiRequest<{ data: any[], meta: { total: number } }>('/conversations');
-};
-
-/**
- * Create a new conversation
- */
-export const createConversation = async (title: string) => {
-  return apiRequest<{ data: any }>('/conversations', {
-    method: 'POST',
-    body: JSON.stringify({ title }),
-  });
-};
-
-/**
- * Delete a conversation
- */
-export const deleteConversation = async (id: number) => {
-  return apiRequest<void>(`/conversations/${id}`, {
-    method: 'DELETE',
-  });
+  return response.json();
 };
 
 /**
  * Get personalized financial advice
  */
 export const getFinancialAdvice = async (
-  request: FinancialAdviceRequest
+  request: FinancialAdviceRequest,
+  options: RequestInit = {}
 ): Promise<FinancialAdviceResponse> => {
-  return apiRequest<FinancialAdviceResponse>('/financial-advice', {
+  const response = await fetch('/api/financial-advice', {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(request),
+    ...options,
   });
+
+  if (!response.ok) {
+    const errorData: ErrorResponse = await response.json();
+    throw new Error(errorData.error.message || 'Failed to get financial advice');
+  }
+
+  return response.json();
 };
+
+// Direct OpenAI API functions for server-side use
+export { openai };

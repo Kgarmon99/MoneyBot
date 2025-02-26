@@ -1,0 +1,3 @@
+{
+  "run": "node server-direct.js"
+}

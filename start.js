@@ -1,3 +1,3 @@
-#!/usr/bin/env node
+// Start server script
 require('esbuild-register');
-require('./server/index.ts');
+require('./start-server.ts');

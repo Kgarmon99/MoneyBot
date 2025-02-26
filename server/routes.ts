@@ -5,8 +5,6 @@ import { MemStorage } from './storage';
 import { 
   chatCompletionRequestSchema,
   financialAdviceRequestSchema,
-  insertConversationSchema,
-  insertMessageSchema
 } from '../shared/schema';
 
 // Initialize storage
@@ -44,125 +42,9 @@ const validateRequest = (schema: z.ZodTypeAny) => {
   };
 };
 
-// Get all conversations
-router.get('/conversations', async (req, res, next) => {
-  try {
-    const conversations = await storage.getConversations();
-    res.json({
-      data: conversations,
-      meta: {
-        total: conversations.length
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Get a specific conversation
-router.get('/conversations/:id', async (req, res, next) => {
-  try {
-    const id = parseInt(req.params.id);
-    const conversation = await storage.getConversation(id);
-    
-    if (!conversation) {
-      return res.status(404).json({
-        error: {
-          code: 'not_found_error',
-          message: 'Conversation not found',
-          status: 404,
-          request_id: req.id
-        }
-      });
-    }
-    
-    res.json({
-      data: conversation
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Create a new conversation
-router.post('/conversations', validateRequest(insertConversationSchema), async (req, res, next) => {
-  try {
-    const conversation = await storage.createConversation(req.validatedBody);
-    res.status(201).json({
-      data: conversation
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Delete a conversation
-router.delete('/conversations/:id', async (req, res, next) => {
-  try {
-    const id = parseInt(req.params.id);
-    await storage.deleteConversation(id);
-    res.status(204).end();
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Get messages (optionally filtered by conversation ID)
-router.get('/messages', async (req, res, next) => {
-  try {
-    const conversationId = req.query.conversation_id 
-      ? parseInt(req.query.conversation_id as string) 
-      : undefined;
-    
-    const messages = await storage.getMessages(conversationId);
-    
-    res.json({
-      data: messages,
-      meta: {
-        total: messages.length,
-        conversation_id: conversationId
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Get a specific message
-router.get('/messages/:id', async (req, res, next) => {
-  try {
-    const id = parseInt(req.params.id);
-    const message = await storage.getMessage(id);
-    
-    if (!message) {
-      return res.status(404).json({
-        error: {
-          code: 'not_found_error',
-          message: 'Message not found',
-          status: 404,
-          request_id: req.id
-        }
-      });
-    }
-    
-    res.json({
-      data: message
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Create a new message
-router.post('/messages', validateRequest(insertMessageSchema), async (req, res, next) => {
-  try {
-    const message = await storage.createMessage(req.validatedBody);
-    res.status(201).json({
-      data: message
-    });
-  } catch (error) {
-    next(error);
-  }
+// Health check endpoint
+router.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
 });
 
 // Get available models
@@ -178,13 +60,13 @@ router.get('/models', async (req, res, next) => {
 });
 
 // Chat completions endpoint
-router.post('/chat/completions', validateRequest(chatCompletionRequestSchema), async (req, res, next) => {
+router.post('/chat/completions', validateRequest(chatCompletionRequestSchema), async (req: any, res, next) => {
   try {
-    const { messages, model, conversation_id, temperature = 0.7, max_tokens = 500 } = req.validatedBody;
+    const { messages, model = 'gpt-4o', conversation_id, temperature = 0.7, max_tokens = 500 } = req.validatedBody;
     
     // Call OpenAI API
     const completion = await openai.chat.completions.create({
-      model: model || 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+      model, // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
       messages,
       temperature,
       max_tokens
@@ -250,7 +132,7 @@ router.post('/chat/completions', validateRequest(chatCompletionRequestSchema), a
 });
 
 // Financial advice endpoint
-router.post('/financial-advice', validateRequest(financialAdviceRequestSchema), async (req, res, next) => {
+router.post('/financial-advice', validateRequest(financialAdviceRequestSchema), async (req: any, res, next) => {
   try {
     const { topic, question, userContext } = req.validatedBody;
     

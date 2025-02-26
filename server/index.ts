@@ -15,7 +15,7 @@ const port = process.env.PORT || 3000;
 // Setup middleware
 app.use(cors());
 app.use(express.json());
-app.use(morgan('dev'));
+app.use(morgan('dev') as any);
 
 // Add request ID middleware
 app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
