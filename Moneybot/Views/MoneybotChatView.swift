@@ -5,14 +5,13 @@ struct MoneybotChatView: View {
     @State private var messageText = ""
     @State private var showingSuggestions = true
     @Binding var user: User
+    @State private var isCalculatorShowing = false
+    @State private var calculatorType: CalculatorType = .compound
     
-    private let suggestionQuestions = [
-        "How do I start saving money?",
-        "What's an emergency fund?",
-        "How should I invest my first $1,000?",
-        "How can I improve my credit score?",
-        "What's the 50/30/20 budget rule?"
-    ]
+    enum CalculatorType {
+        case compound
+        case savings
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -53,9 +52,67 @@ struct MoneybotChatView: View {
                 .background(Color(.systemGroupedBackground))
             }
             
-            // Suggestions
-            if showingSuggestions {
-                suggestionView
+            // Suggested follow-ups
+            if showingSuggestions && !service.suggestedFollowUps.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(service.suggestedFollowUps, id: \.self) { question in
+                            Button(action: {
+                                messageText = question
+                                sendMessage()
+                            }) {
+                                Text(question)
+                                    .font(.subheadline)
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 8)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .fill(Color(.systemGray5))
+                                    )
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 12)
+                    .padding(.bottom, 8)
+                }
+                .background(Color(.systemGray6))
+            }
+            
+            // Calculator tools
+            if isCalculatorShowing {
+                VStack(spacing: 12) {
+                    HStack {
+                        Text("Financial Calculator")
+                            .font(.headline)
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            withAnimation {
+                                isCalculatorShowing = false
+                            }
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    
+                    Picker("Calculator Type", selection: $calculatorType) {
+                        Text("Compound Interest").tag(CalculatorType.compound)
+                        Text("Savings Goal").tag(CalculatorType.savings)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    
+                    if calculatorType == .compound {
+                        CompoundInterestCalculator(service: service)
+                    } else {
+                        SavingsGoalCalculator(service: service)
+                    }
+                }
+                .padding()
+                .background(Color(.systemGray6))
             }
             
             // Message input
@@ -86,33 +143,6 @@ struct MoneybotChatView: View {
         }
     }
     
-    private var suggestionView: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                ForEach(suggestionQuestions, id: \.self) { question in
-                    Button(action: {
-                        messageText = question
-                        sendMessage()
-                    }) {
-                        Text(question)
-                            .font(.subheadline)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(Color(.systemGray5))
-                            )
-                            .foregroundColor(.primary)
-                    }
-                }
-            }
-            .padding(.horizontal)
-            .padding(.top, 12)
-            .padding(.bottom, 8)
-        }
-        .background(Color(.systemGray6))
-    }
-    
     private var messageInputView: some View {
         HStack(alignment: .bottom, spacing: 10) {
             Button(action: {
@@ -121,6 +151,21 @@ struct MoneybotChatView: View {
                 }
             }) {
                 Image(systemName: showingSuggestions ? "chevron.down" : "lightbulb")
+                    .font(.system(size: 20))
+                    .foregroundColor(.green)
+                    .padding(8)
+                    .background(
+                        Circle()
+                            .fill(Color(.systemGray5))
+                    )
+            }
+            
+            Button(action: {
+                withAnimation {
+                    isCalculatorShowing.toggle()
+                }
+            }) {
+                Image(systemName: "function")
                     .font(.system(size: 20))
                     .foregroundColor(.green)
                     .padding(8)
@@ -197,6 +242,130 @@ struct MessageBubble: View {
                 Spacer()
             }
         }
+    }
+}
+
+struct CompoundInterestCalculator: View {
+    let service: MoneybotService
+    @State private var principal: String = "1000"
+    @State private var rate: String = "7"
+    @State private var years: String = "10"
+    @State private var monthlyContribution: String = "0"
+    
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack {
+                Text("Initial amount:")
+                TextField("$", text: $principal)
+                    .keyboardType(.decimalPad)
+                    .padding(8)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(8)
+            }
+            
+            HStack {
+                Text("Interest rate (%):")
+                TextField("%", text: $rate)
+                    .keyboardType(.decimalPad)
+                    .padding(8)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(8)
+            }
+            
+            HStack {
+                Text("Years:")
+                TextField("years", text: $years)
+                    .keyboardType(.numberPad)
+                    .padding(8)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(8)
+            }
+            
+            HStack {
+                Text("Monthly add:")
+                TextField("$", text: $monthlyContribution)
+                    .keyboardType(.decimalPad)
+                    .padding(8)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(8)
+            }
+            
+            Button(action: calculateAndSend) {
+                Text("Calculate")
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 8)
+                    .background(Color.green)
+                    .cornerRadius(12)
+            }
+            .padding(.top, 8)
+        }
+    }
+    
+    private func calculateAndSend() {
+        let principalValue = Double(principal) ?? 1000
+        let rateValue = Double(rate) ?? 7
+        let yearsValue = Int(years) ?? 10
+        let monthlyValue = Double(monthlyContribution) ?? 0
+        
+        let result = service.calculateCompoundInterest(
+            principal: principalValue,
+            rate: rateValue,
+            years: yearsValue,
+            monthlyContribution: monthlyValue
+        )
+        
+        service.sendMessage("Calculate compound interest with principal $\(principal), rate \(rate)%, time \(years) years, and monthly contribution $\(monthlyContribution)")
+    }
+}
+
+struct SavingsGoalCalculator: View {
+    let service: MoneybotService
+    @State private var goal: String = "10000"
+    @State private var months: String = "24"
+    
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack {
+                Text("Goal amount:")
+                TextField("$", text: $goal)
+                    .keyboardType(.decimalPad)
+                    .padding(8)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(8)
+            }
+            
+            HStack {
+                Text("Months to goal:")
+                TextField("months", text: $months)
+                    .keyboardType(.numberPad)
+                    .padding(8)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(8)
+            }
+            
+            Button(action: calculateAndSend) {
+                Text("Calculate")
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 8)
+                    .background(Color.green)
+                    .cornerRadius(12)
+            }
+            .padding(.top, 8)
+        }
+    }
+    
+    private func calculateAndSend() {
+        let goalValue = Double(goal) ?? 10000
+        let monthsValue = Int(months) ?? 24
+        
+        let result = service.generateSavingsPlan(
+            goal: goalValue,
+            timeframe: monthsValue
+        )
+        
+        service.sendMessage("I want to save $\(goal) in \(months) months. What's my savings plan?")
     }
 }
 

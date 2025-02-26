@@ -1,104 +1,98 @@
-import SwiftUI
+import Foundation
 import UserNotifications
 
-class NotificationManager: ObservableObject {
+class NotificationManager {
     static let shared = NotificationManager()
-    @Published var isPermissionGranted = false
-    @Published var notificationsEnabled: Bool {
-        didSet {
-            UserDefaults.standard.set(notificationsEnabled, forKey: "notificationsEnabled")
-            if !notificationsEnabled {
-                UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-            }
-        }
-    }
-
+    
     private init() {
-        self.notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
-        checkNotificationPermission()
+        requestPermission()
     }
-
-    func checkNotificationPermission() {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            DispatchQueue.main.async {
-                self.isPermissionGranted = settings.authorizationStatus == .authorized
-            }
-        }
-    }
-
+    
     func requestPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
-            DispatchQueue.main.async {
-                self.isPermissionGranted = granted
-                if granted {
-                    print("Notification permission granted")
-                } else {
-                    print("Notification permission denied")
-                }
+            if granted {
+                print("Notification permission granted")
+            } else if let error = error {
+                print("Notification permission error: \(error.localizedDescription)")
             }
         }
     }
-
+    
     func scheduleNotifications(hasChallenge: Bool, hasActiveGoals: Bool) {
-        // First remove all pending notifications
+        // Cancel existing notifications to avoid duplicates
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-
-        // Only schedule if permission is granted
-        if !isPermissionGranted {
-            requestPermission()
-            return
-        }
-
-        // Challenge reminder
-        if !hasChallenge {
-            scheduleNotification(
-                identifier: "dailyChallenge",
-                title: "Time for Today's Money Move! 💰",
-                body: "Complete a financial challenge to keep your streak going!",
-                hour: 8,
-                minute: 24
+        
+        // Schedule daily reminders
+        scheduleDailyReminder(at: 9, title: "Morning Motivation", body: "Rise and shine! Let's make financial progress today 💰")
+        
+        // Challenge reminder (if active)
+        if hasChallenge {
+            scheduleRandomReminder(
+                title: "Challenge Check-in",
+                body: "How's your financial challenge going? Tap to update your progress!",
+                timeRange: (10, 17) // Between 10 AM and 5 PM
             )
         }
-
-        // Learning reminder
-        scheduleNotification(
-            identifier: "learning",
-            title: "Keep Learning! 📚",
-            body: "Take a moment to expand your financial knowledge.",
-            hour: 12,
-            minute: 0
-        )
-
-        // Goals check-in
+        
+        // Goal reminder (if has active goals)
         if hasActiveGoals {
-            scheduleNotification(
-                identifier: "goals",
-                title: "Check Your Vision 👑",
-                body: "Building generational wealth starts with you. Stay locked in! 🎯",
-                hour: 20,
-                minute: 24
+            scheduleRandomReminder(
+                title: "Goal Progress",
+                body: "Remember your financial goals? Check in on your progress!",
+                timeRange: (13, 19) // Between 1 PM and 7 PM
             )
         }
+        
+        // Evening reflection regardless of challenge/goal status
+        scheduleDailyReminder(at: 20, title: "Evening Reflection", body: "Take a moment to review your finances today.")
+        
+        // Ask Moneybot reminder
+        scheduleRandomReminder(
+            title: "Moneybot Tip",
+            body: "Ask me a question about money! I'm here to help with your finances.",
+            timeRange: (12, 18) // Between 12 PM and 6 PM
+        )
     }
-
-    private func scheduleNotification(identifier: String, title: String, body: String, hour: Int, minute: Int) {
+    
+    private func scheduleDailyReminder(at hour: Int, title: String, body: String) {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = .default
-
+        
         var dateComponents = DateComponents()
         dateComponents.hour = hour
-        dateComponents.minute = minute
-
+        dateComponents.minute = 0
+        
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
-
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
-                print("Error scheduling notification: \(error)")
+                print("Notification scheduling error: \(error.localizedDescription)")
             }
         }
     }
-
+    
+    private func scheduleRandomReminder(title: String, body: String, timeRange: (Int, Int)) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        
+        // Schedule for tomorrow at random time within range
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+        components.day! += 1 // Next day
+        components.hour = Int.random(in: timeRange.0...timeRange.1)
+        components.minute = Int.random(in: 0...59)
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Notification scheduling error: \(error.localizedDescription)")
+            }
+        }
     }
+}
