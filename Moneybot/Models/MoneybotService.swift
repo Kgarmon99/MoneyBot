@@ -1,58 +1,75 @@
 import Foundation
 import Combine
+import SwiftUI
 
 class MoneybotService: ObservableObject {
     @Published var messages: [ChatMessage] = []
-    @Published var isLoading: Bool = false
+    @Published var isLoading = false
     
-    private let openAIURL = URL(string: "https://api.openai.com/v1/chat/completions")!
     private var cancellables = Set<AnyCancellable>()
     
     init() {
-        // Add initial system message
-        let systemMessage = ChatMessage(
-            role: .system,
-            content: "You are Moneybot, a friendly and helpful financial advisor. Your goal is to help users understand financial concepts, make better financial decisions, and achieve their financial goals. Use simple language, be encouraging, and always prioritize the user's financial well-being."
-        )
-        messages.append(systemMessage)
+        // Add initial system message - not visible to the user
+        addSystemMessage("""
+        You are Moneybot, a friendly and knowledgeable financial advisor assistant. Your purpose is to help users understand financial concepts, make better financial decisions, and achieve their money goals.
+        
+        Guidelines:
+        1. Keep answers concise and simple - use everyday language anyone can understand
+        2. Be encouraging, positive, and non-judgmental
+        3. Focus on practical advice rather than technical details
+        4. Provide actionable steps when possible
+        5. Always prioritize the user's financial well-being
+        6. When relevant, explain financial concepts clearly
+        7. Use emoji occasionally to keep the conversation friendly 💰
+        """)
         
         // Add welcome message
-        let welcomeMessage = ChatMessage(
-            role: .assistant,
-            content: "Hi there! I'm Moneybot, your personal financial co-pilot. 💰 I'm here to help you with budgeting, saving, investing, or any other money questions you might have. What would you like to talk about today?"
-        )
-        messages.append(welcomeMessage)
+        addAssistantMessage("👋 Hi there! I'm Moneybot, your personal financial co-pilot. How can I help with your money questions today?")
     }
     
     func sendMessage(_ content: String) {
+        guard !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        
         let userMessage = ChatMessage(role: .user, content: content)
         messages.append(userMessage)
         
-        requestChatCompletion()
+        requestOpenAIResponse()
     }
     
-    private func requestChatCompletion() {
+    private func addSystemMessage(_ content: String) {
+        let message = ChatMessage(role: .system, content: content)
+        messages.append(message)
+    }
+    
+    private func addAssistantMessage(_ content: String) {
+        let message = ChatMessage(role: .assistant, content: content)
+        messages.append(message)
+    }
+    
+    private func requestOpenAIResponse() {
         guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] else {
-            let errorMessage = ChatMessage(
-                role: .assistant,
-                content: "I'm having trouble connecting to my brain right now. Please check your OpenAI API key configuration."
-            )
-            messages.append(errorMessage)
+            addAssistantMessage("Sorry, I'm having trouble connecting to my brain. Please make sure you have set up your OpenAI API key correctly.")
             return
         }
         
         isLoading = true
         
-        // Convert messages for API format
-        let apiMessages = messages.map { OpenAIChatRequest.OpenAIChatMessage(role: $0.role.rawValue, content: $0.content) }
+        // Prepare messages for API
+        let apiMessages = messages.map { OpenAIRequest.OpenAIMessage(role: $0.role.rawValue, content: $0.content) }
         
-        let request = OpenAIChatRequest(
+        let request = OpenAIRequest(
             model: "gpt-3.5-turbo",
             messages: apiMessages,
             temperature: 0.7
         )
         
-        var urlRequest = URLRequest(url: openAIURL)
+        // Create URL request
+        guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
+            handleError("Invalid API URL")
+            return
+        }
+        
+        var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
@@ -60,40 +77,42 @@ class MoneybotService: ObservableObject {
         do {
             urlRequest.httpBody = try JSONEncoder().encode(request)
         } catch {
-            handleError(error)
+            handleError("Failed to encode request: \(error.localizedDescription)")
             return
         }
         
+        // Make API call
         URLSession.shared.dataTaskPublisher(for: urlRequest)
             .map(\.data)
-            .decode(type: OpenAIChatResponse.self, decoder: JSONDecoder())
+            .decode(type: OpenAIResponse.self, decoder: JSONDecoder())
             .receive(on: DispatchQueue.main)
             .sink(
                 receiveCompletion: { [weak self] completion in
                     self?.isLoading = false
+                    
                     if case .failure(let error) = completion {
-                        self?.handleError(error)
+                        self?.handleError("API Error: \(error.localizedDescription)")
                     }
                 },
                 receiveValue: { [weak self] response in
-                    guard let self = self, let content = response.choices.first?.message.content else { return }
+                    guard 
+                        let self = self,
+                        let choice = response.choices.first,
+                        !choice.message.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    else {
+                        self?.handleError("Received empty response")
+                        return
+                    }
                     
-                    let responseMessage = ChatMessage(
-                        role: .assistant,
-                        content: content
-                    )
-                    self.messages.append(responseMessage)
+                    self.addAssistantMessage(choice.message.content)
                 }
             )
             .store(in: &cancellables)
     }
     
-    private func handleError(_ error: Error) {
-        print("OpenAI API Error: \(error)")
-        let errorMessage = ChatMessage(
-            role: .assistant,
-            content: "I'm having trouble right now. Please try again later."
-        )
-        messages.append(errorMessage)
+    private func handleError(_ message: String) {
+        print("Moneybot Error: \(message)")
+        isLoading = false
+        addAssistantMessage("Sorry, I'm having some technical difficulties right now. Please try again in a moment.")
     }
 }

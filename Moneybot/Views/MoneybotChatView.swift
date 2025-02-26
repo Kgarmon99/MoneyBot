@@ -1,129 +1,120 @@
 import SwiftUI
-import Combine
 
 struct MoneybotChatView: View {
-    @StateObject private var moneybotService = MoneybotService()
-    @State private var messageText: String = ""
-    @State private var showingSuggestions: Bool = true
-    @State private var scrollToBottom: Bool = false
+    @StateObject private var service = MoneybotService()
+    @State private var messageText = ""
+    @State private var showingSuggestions = true
     @Binding var user: User
     
     private let suggestionQuestions = [
-        "How can I start building an emergency fund?",
-        "What's the difference between saving and investing?",
-        "How should I prioritize paying off debt?",
-        "Can you explain compound interest?",
-        "How much should I save for retirement?"
+        "How do I start saving money?",
+        "What's an emergency fund?",
+        "How should I invest my first $1,000?",
+        "How can I improve my credit score?",
+        "What's the 50/30/20 budget rule?"
     ]
     
     var body: some View {
         VStack(spacing: 0) {
+            // Chat messages
             ScrollViewReader { scrollView in
                 ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(moneybotService.messages.filter { $0.role != .system }) { message in
+                    LazyVStack(spacing: 16) {
+                        ForEach(service.messages.filter { $0.role != .system }) { message in
                             MessageBubble(message: message)
                                 .id(message.id)
                         }
                         
-                        if moneybotService.isLoading {
-                            HStack {
-                                Spacer()
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .green))
-                                    .scaleEffect(1.2)
-                                    .padding()
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(20)
-                                Spacer()
-                            }
-                            .padding(.horizontal)
-                            .padding(.top, 8)
+                        // Loading indicator
+                        if service.isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .green))
+                                .scaleEffect(1.2)
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .center)
                         }
                     }
-                    .padding(.vertical)
+                    .padding()
                 }
-                .onAppear {
-                    scrollToBottom = true
-                }
-                .onChange(of: moneybotService.messages.count) { _ in
+                .onChange(of: service.messages.count) { _ in
                     withAnimation {
-                        if let lastMessage = moneybotService.messages.last {
+                        if let lastMessage = service.messages.last(where: { $0.role != .system }) {
                             scrollView.scrollTo(lastMessage.id, anchor: .bottom)
                         }
                     }
                     
-                    // Add XP if user received new AI message
-                    if let lastMessage = moneybotService.messages.last, lastMessage.role == .assistant {
-                        if lastMessage.content != "I'm having trouble right now. Please try again later." {
-                            user.xp += 10 // Award XP for each meaningful interaction
-                        }
+                    // Award XP for meaningful interactions
+                    if let lastMessage = service.messages.last, 
+                       lastMessage.role == .assistant,
+                       !lastMessage.content.contains("technical difficulties") {
+                        user.xp += 10
                     }
                 }
+                .background(Color(.systemGroupedBackground))
             }
             
+            // Suggestions
             if showingSuggestions {
                 suggestionView
             }
             
-            inputBar
+            // Message input
+            messageInputView
         }
-        .background(Color(.systemGray6))
-        .navigationTitle("MoneyBot Chat")
-        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            user.chatInteractions += 1
+            // Track usage in user stats
+            if user.chatSessions == nil {
+                user.chatSessions = 1
+            } else {
+                user.chatSessions! += 1
+            }
             
-            // Check for earned achievements
-            if user.chatInteractions == 1 {
-                user.achievements.append(Achievement(
+            // Check for achievement
+            if user.chatSessions == 1 {
+                let achievement = Achievement(
                     title: "First Chat",
                     description: "Started your first conversation with Moneybot",
-                    icon: "message.fill",
-                    xpValue: 50
-                ))
-                user.xp += 50
-            } else if user.chatInteractions == 5 {
-                user.achievements.append(Achievement(
-                    title: "Curious Mind",
-                    description: "Had 5 conversations with Moneybot",
-                    icon: "lightbulb.fill",
-                    xpValue: 100
-                ))
-                user.xp += 100
+                    icon: "message.circle.fill",
+                    unlocked: true
+                )
+                
+                if !user.achievements.contains(where: { $0.title == achievement.title }) {
+                    user.achievements.append(achievement)
+                    user.xp += 50
+                }
             }
         }
     }
     
     private var suggestionView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 ForEach(suggestionQuestions, id: \.self) { question in
                     Button(action: {
                         messageText = question
                         sendMessage()
                     }) {
                         Text(question)
-                            .font(.system(size: 14))
-                            .foregroundColor(.primary)
-                            .padding(.horizontal, 16)
+                            .font(.subheadline)
+                            .padding(.horizontal, 14)
                             .padding(.vertical, 8)
                             .background(
                                 RoundedRectangle(cornerRadius: 16)
                                     .fill(Color(.systemGray5))
                             )
+                            .foregroundColor(.primary)
                     }
                 }
             }
             .padding(.horizontal)
-            .padding(.top, 8)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
         }
-        .padding(.vertical, 8)
         .background(Color(.systemGray6))
     }
     
-    private var inputBar: some View {
-        HStack(alignment: .center, spacing: 10) {
+    private var messageInputView: some View {
+        HStack(alignment: .bottom, spacing: 10) {
             Button(action: {
                 withAnimation {
                     showingSuggestions.toggle()
@@ -133,7 +124,10 @@ struct MoneybotChatView: View {
                     .font(.system(size: 20))
                     .foregroundColor(.green)
                     .padding(8)
-                    .background(Circle().fill(Color(.systemGray5)))
+                    .background(
+                        Circle()
+                            .fill(Color(.systemGray5))
+                    )
             }
             
             TextField("Ask Moneybot...", text: $messageText)
@@ -141,95 +135,79 @@ struct MoneybotChatView: View {
                 .background(Color(.systemGray5))
                 .cornerRadius(20)
                 .submitLabel(.send)
-                .onSubmit {
-                    sendMessage()
-                }
+                .onSubmit(sendMessage)
             
             Button(action: sendMessage) {
                 Image(systemName: "arrow.up.circle.fill")
-                    .font(.system(size: 30))
+                    .font(.system(size: 32))
                     .foregroundColor(messageText.isEmpty ? Color(.systemGray3) : .green)
             }
-            .disabled(messageText.isEmpty || moneybotService.isLoading)
+            .disabled(messageText.isEmpty || service.isLoading)
         }
         .padding()
         .background(Color(.systemGray6))
     }
     
     private func sendMessage() {
-        guard !messageText.isEmpty, !moneybotService.isLoading else { return }
+        guard !messageText.isEmpty, !service.isLoading else { return }
         
-        let message = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let text = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
         messageText = ""
-        moneybotService.sendMessage(message)
         
-        // Hide suggestions after sending a message
         withAnimation {
             showingSuggestions = false
         }
+        
+        service.sendMessage(text)
     }
 }
 
 struct MessageBubble: View {
     let message: ChatMessage
     
-    private var isUser: Bool {
-        message.role == .user
-    }
-    
     var body: some View {
         HStack {
-            if isUser { Spacer() }
+            if message.role == .user {
+                Spacer()
+            }
             
-            VStack(alignment: isUser ? .trailing : .leading, spacing: 4) {
+            VStack(alignment: message.role == .user ? .trailing : .leading, spacing: 2) {
                 Text(message.role.displayName)
                     .font(.caption)
                     .foregroundColor(.gray)
                     .padding(.horizontal, 4)
                 
                 Text(message.content)
-                    .padding(12)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
                     .background(
-                        isUser ?
-                        LinearGradient(
-                            colors: [.green, Color.green.opacity(0.8)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ) :
-                        LinearGradient(
-                            colors: [Color(.systemGray5), Color(.systemGray4)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+                        message.role == .user ?
+                            LinearGradient(
+                                gradient: Gradient(colors: [.green, Color.green.opacity(0.8)]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ) :
+                            Color(.systemGray5)
                     )
-                    .foregroundColor(isUser ? .white : .primary)
+                    .foregroundColor(message.role == .user ? .white : .primary)
                     .cornerRadius(18)
             }
-            .padding(.horizontal)
             
-            if !isUser { Spacer() }
+            if message.role == .assistant {
+                Spacer()
+            }
         }
     }
 }
 
-struct Achievement {
-    var id = UUID()
-    var title: String
-    var description: String
-    var icon: String
-    var xpValue: Int
-    var dateEarned: Date = Date()
-}
-
+// Extended User model with chat tracking
 extension User {
-    // These would typically be in the User model, but adding for illustration
-    var chatInteractions: Int {
-        get { UserDefaults.standard.integer(forKey: "chatInteractions") }
-        set { UserDefaults.standard.set(newValue, forKey: "chatInteractions") }
-    }
-    
-    mutating func addAchievement(_ achievement: Achievement) {
-        achievements.append(achievement)
-        xp += achievement.xpValue
+    var chatSessions: Int? {
+        get { UserDefaults.standard.integer(forKey: "userChatSessions") }
+        set { 
+            if let value = newValue {
+                UserDefaults.standard.set(value, forKey: "userChatSessions")
+            }
+        }
     }
 }

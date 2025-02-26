@@ -1,48 +1,39 @@
 import Foundation
 
 struct ChatMessage: Identifiable, Codable {
-    var id: UUID = UUID()
-    var role: MessageRole
-    var content: String
-    var timestamp: Date = Date()
+    let id: UUID = UUID()
+    let role: MessageRole
+    let content: String
+    let timestamp: Date = Date()
+}
+
+// OpenAI API request and response models
+struct OpenAIRequest: Codable {
+    let model: String
+    let messages: [OpenAIMessage]
+    let temperature: Double
     
-    enum CodingKeys: String, CodingKey {
-        case id, role, content, timestamp
+    struct OpenAIMessage: Codable {
+        let role: String
+        let content: String
     }
 }
 
-// Request and response structures for OpenAI API
-struct OpenAIChatRequest: Codable {
-    var model: String
-    var messages: [OpenAIChatMessage]
-    var temperature: Float
-    
-    struct OpenAIChatMessage: Codable {
-        var role: String
-        var content: String
-    }
-}
-
-struct OpenAIChatResponse: Codable {
-    var id: String
-    var object: String
-    var created: TimeInterval
-    var model: String
-    var choices: [Choice]
-    
+struct OpenAIResponse: Codable {
     struct Choice: Codable {
-        var index: Int
-        var message: Message
-        var finishReason: String
+        struct Message: Codable {
+            let role: String
+            let content: String
+        }
+        
+        let message: Message
+        let finishReason: String
         
         enum CodingKeys: String, CodingKey {
-            case index, message
+            case message
             case finishReason = "finish_reason"
         }
     }
     
-    struct Message: Codable {
-        var role: String
-        var content: String
-    }
+    let choices: [Choice]
 }
