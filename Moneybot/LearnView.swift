@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct LearnView: View {
@@ -88,8 +87,11 @@ struct LearnView: View {
                     AudioCard(audio: audioContent[currentTipIndex % audioContent.count])
                     NavigationControls(currentIndex: $currentTipIndex, totalItems: audioContent.count)
                 }
-            case .moneybot:
-                MoneybotChatView(user: $user)
+            case .tips:
+                VStack {
+                    TipCard(tip: tips[currentTipIndex % tips.count])
+                    NavigationControls(currentIndex: $currentTipIndex, totalItems: tips.count)
+                }
             }
         }
     }
@@ -375,6 +377,3 @@ struct NavigationControls: View {
         .padding()
     }
 }
-
-
-
