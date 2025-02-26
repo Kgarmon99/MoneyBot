@@ -15,7 +15,7 @@ const port = process.env.PORT || 3000;
 // Setup middleware
 app.use(cors());
 app.use(express.json());
-app.use(morgan('dev') as express.RequestHandler);
+app.use(morgan('dev'));
 
 // Add request ID middleware
 app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -62,7 +62,7 @@ if (!process.env.OPENAI_API_KEY) {
 }
 
 // Start server
-app.listen(port, '0.0.0.0', () => {
+const server = app.listen(Number(port), '0.0.0.0', () => {
   console.log(`MoneyBot API server listening on port ${port}`);
   console.log(`Server running at http://0.0.0.0:${port}`);
   console.log(`API endpoints available at http://0.0.0.0:${port}/api`);
