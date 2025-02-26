@@ -1,162 +1,99 @@
 import Foundation
-import SwiftUI
+import Combine
 
-/**
- * MoneybotService - Handles communication with OpenAI API for financial advice
- */
 class MoneybotService: ObservableObject {
-    // Published properties to support SwiftUI views
     @Published var messages: [ChatMessage] = []
-    @Published var isLoading = false
+    @Published var isLoading: Bool = false
     
-    // Static instance for singleton access
-    static let shared = MoneybotService()
+    private let openAIURL = URL(string: "https://api.openai.com/v1/chat/completions")!
+    private var cancellables = Set<AnyCancellable>()
     
-    // System prompts to define the personality and capabilities of Moneybot
-    private let systemPrompts = [
-        "You are Moneybot, a helpful financial co-pilot designed to provide personalized financial advice.",
-        "You analyze expenses, help create budgets, explain financial concepts, and provide guidance on investing.",
-        "You are friendly, encouraging, and make finance simple to understand.",
-        "Tailor advice to the user's experience level and financial situation.",
-        "Focus on practical advice that can be implemented immediately.",
-        "If you don't know the answer, be honest and suggest resources to learn more.",
-        "Never recommend specific stocks or make promises about investment returns.",
-        "Your goal is to help users build better money habits through education and planning."
-    ]
-    
-    // Private constructor for singleton pattern
-    private init() {
-        // Initialize the chat with a welcome message
+    init() {
+        // Add initial system message
+        let systemMessage = ChatMessage(
+            role: .system,
+            content: "You are Moneybot, a friendly and helpful financial advisor. Your goal is to help users understand financial concepts, make better financial decisions, and achieve their financial goals. Use simple language, be encouraging, and always prioritize the user's financial well-being."
+        )
+        messages.append(systemMessage)
+        
+        // Add welcome message
         let welcomeMessage = ChatMessage(
             role: .assistant,
-            content: "Hi there! I'm Moneybot, your financial co-pilot. I can help you with budgeting, saving, investing, or understanding financial concepts. What's on your financial mind today?"
+            content: "Hi there! I'm Moneybot, your personal financial co-pilot. 💰 I'm here to help you with budgeting, saving, investing, or any other money questions you might have. What would you like to talk about today?"
         )
         messages.append(welcomeMessage)
     }
     
-    /**
-     * Sends a message to the OpenAI API and gets a response
-     * @param userMessage The message from the user
-     * @param completion Callback with the result
-     */
-    func sendMessage(_ userMessage: String, completion: @escaping (Result<String, Error>) -> Void) {
-        // Add user message to chat history
-        let userChatMessage = ChatMessage(role: .user, content: userMessage)
-        messages.append(userChatMessage)
+    func sendMessage(_ content: String) {
+        let userMessage = ChatMessage(role: .user, content: content)
+        messages.append(userMessage)
         
-        // Start loading state
+        requestChatCompletion()
+    }
+    
+    private func requestChatCompletion() {
+        guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] else {
+            let errorMessage = ChatMessage(
+                role: .assistant,
+                content: "I'm having trouble connecting to my brain right now. Please check your OpenAI API key configuration."
+            )
+            messages.append(errorMessage)
+            return
+        }
+        
         isLoading = true
         
-        // Construct messages for API call
-        var apiMessages: [[String: Any]] = []
+        // Convert messages for API format
+        let apiMessages = messages.map { OpenAIChatRequest.OpenAIChatMessage(role: $0.role.rawValue, content: $0.content) }
         
-        // Add system prompt first
-        apiMessages.append([
-            "role": "system",
-            "content": systemPrompts.joined(separator: " ")
-        ])
+        let request = OpenAIChatRequest(
+            model: "gpt-3.5-turbo",
+            messages: apiMessages,
+            temperature: 0.7
+        )
         
-        // Add conversation history (limited to last 10 messages to stay within token limits)
-        let recentMessages = messages.suffix(10)
-        for message in recentMessages {
-            apiMessages.append([
-                "role": message.role.rawValue,
-                "content": message.content
-            ])
-        }
+        var urlRequest = URLRequest(url: openAIURL)
+        urlRequest.httpMethod = "POST"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         
-        // Prepare the request body
-        let requestBody: [String: Any] = [
-            "model": "gpt-4o",  // Using the latest model
-            "messages": apiMessages,
-            "temperature": 0.7,
-            "max_tokens": 1000
-        ]
-        
-        // Convert request body to JSON data
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: requestBody) else {
-            isLoading = false
-            completion(.failure(NSError(domain: "MoneybotService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to create request data"])))
+        do {
+            urlRequest.httpBody = try JSONEncoder().encode(request)
+        } catch {
+            handleError(error)
             return
         }
         
-        // Create the URL request
-        guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
-            isLoading = false
-            completion(.failure(NSError(domain: "MoneybotService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Get the API key from environment or info.plist
-        // In a real app, you'd store this securely using Keychain
-        let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        
-        request.httpBody = jsonData
-        
-        // Make the API call
-        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                self?.isLoading = false
-                
-                // Handle errors
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                
-                // Check for data
-                guard let data = data else {
-                    completion(.failure(NSError(domain: "MoneybotService", code: 3, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
-                    return
-                }
-                
-                // Parse the response
-                do {
-                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let choices = json["choices"] as? [[String: Any]],
-                       let firstChoice = choices.first,
-                       let message = firstChoice["message"] as? [String: Any],
-                       let content = message["content"] as? String {
-                        
-                        // Add assistant message to chat history
-                        let assistantMessage = ChatMessage(role: .assistant, content: content)
-                        self?.messages.append(assistantMessage)
-                        
-                        // Return success
-                        completion(.success(content))
-                    } else {
-                        // Try to extract error message
-                        if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                           let error = json["error"] as? [String: Any],
-                           let message = error["message"] as? String {
-                            completion(.failure(NSError(domain: "MoneybotService", code: 4, userInfo: [NSLocalizedDescriptionKey: message])))
-                        } else {
-                            completion(.failure(NSError(domain: "MoneybotService", code: 5, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])))
-                        }
+        URLSession.shared.dataTaskPublisher(for: urlRequest)
+            .map(\.data)
+            .decode(type: OpenAIChatResponse.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { [weak self] completion in
+                    self?.isLoading = false
+                    if case .failure(let error) = completion {
+                        self?.handleError(error)
                     }
-                } catch {
-                    completion(.failure(error))
+                },
+                receiveValue: { [weak self] response in
+                    guard let self = self, let content = response.choices.first?.message.content else { return }
+                    
+                    let responseMessage = ChatMessage(
+                        role: .assistant,
+                        content: content
+                    )
+                    self.messages.append(responseMessage)
                 }
-            }
-        }
-        
-        task.resume()
+            )
+            .store(in: &cancellables)
     }
     
-    /**
-     * Clears the chat history
-     */
-    func clearChat() {
-        messages = []
-        let welcomeMessage = ChatMessage(
+    private func handleError(_ error: Error) {
+        print("OpenAI API Error: \(error)")
+        let errorMessage = ChatMessage(
             role: .assistant,
-            content: "Hi there! I'm Moneybot, your financial co-pilot. I can help you with budgeting, saving, investing, or understanding financial concepts. What's on your financial mind today?"
+            content: "I'm having trouble right now. Please try again later."
         )
-        messages.append(welcomeMessage)
+        messages.append(errorMessage)
     }
 }

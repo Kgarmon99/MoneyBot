@@ -60,10 +60,7 @@ struct LearnView: View {
         Group {
             switch contentType {
             case .moneybot:
-                VStack {
-                    TipCard(tip: tips[currentTipIndex % tips.count])
-                    NavigationControls(currentIndex: $currentTipIndex, totalItems: tips.count)
-                }
+                MoneybotChatView(user: $user)
             case .quotes:
                 VStack {
                     QuoteCard(quote: quotes[currentTipIndex % quotes.count])
@@ -92,10 +89,7 @@ struct LearnView: View {
                     NavigationControls(currentIndex: $currentTipIndex, totalItems: audioContent.count)
                 }
             case .moneybot:
-                VStack {
-                    TipCard(tip: tips[currentTipIndex % tips.count])
-                    NavigationControls(currentIndex: $currentTipIndex, totalItems: tips.count)
-                }
+                MoneybotChatView(user: $user)
             }
         }
     }

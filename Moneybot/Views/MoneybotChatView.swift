@@ -1,141 +1,171 @@
 import SwiftUI
+import Combine
 
 struct MoneybotChatView: View {
-    @StateObject private var moneybotService = MoneybotService.shared
-    @State private var newMessage = ""
-    @State private var scrollProxy: ScrollViewProxy? = nil
-    @FocusState private var isInputFocused: Bool
+    @StateObject private var moneybotService = MoneybotService()
+    @State private var messageText: String = ""
+    @State private var showingSuggestions: Bool = true
+    @State private var scrollToBottom: Bool = false
+    @Binding var user: User
     
-    // Colors for chat bubbles
-    private let userBubbleColor = Color.green.opacity(0.2)
-    private let botBubbleColor = Color.gray.opacity(0.1)
+    private let suggestionQuestions = [
+        "How can I start building an emergency fund?",
+        "What's the difference between saving and investing?",
+        "How should I prioritize paying off debt?",
+        "Can you explain compound interest?",
+        "How much should I save for retirement?"
+    ]
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header with logo and title
-            HStack {
-                Image("new-moneybot-logo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 30)
-                
-                Text("Moneybot Co-Pilot")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                Button(action: {
-                    moneybotService.clearChat()
-                }) {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 16))
-                        .foregroundColor(.gray)
-                }
-                .padding(8)
-                .background(Color.gray.opacity(0.1))
-                .clipShape(Circle())
-            }
-            .padding()
-            .background(Color.white)
-            .shadow(color: Color.black.opacity(0.05), radius: 5, y: 5)
-            
-            // Chat messages
-            ScrollViewReader { proxy in
+            ScrollViewReader { scrollView in
                 ScrollView {
                     LazyVStack(spacing: 12) {
-                        ForEach(moneybotService.messages) { message in
+                        ForEach(moneybotService.messages.filter { $0.role != .system }) { message in
                             MessageBubble(message: message)
                                 .id(message.id)
                         }
                         
-                        // Ghost bubble for when bot is typing
                         if moneybotService.isLoading {
                             HStack {
-                                BotTypingIndicator()
+                                Spacer()
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .green))
+                                    .scaleEffect(1.2)
+                                    .padding()
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(20)
                                 Spacer()
                             }
-                            .id("loadingIndicator")
+                            .padding(.horizontal)
+                            .padding(.top, 8)
                         }
                     }
-                    .padding()
+                    .padding(.vertical)
+                }
+                .onAppear {
+                    scrollToBottom = true
                 }
                 .onChange(of: moneybotService.messages.count) { _ in
                     withAnimation {
                         if let lastMessage = moneybotService.messages.last {
-                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                            scrollView.scrollTo(lastMessage.id, anchor: .bottom)
                         }
                     }
-                }
-                .onChange(of: moneybotService.isLoading) { isLoading in
-                    if isLoading {
-                        withAnimation {
-                            proxy.scrollTo("loadingIndicator", anchor: .bottom)
+                    
+                    // Add XP if user received new AI message
+                    if let lastMessage = moneybotService.messages.last, lastMessage.role == .assistant {
+                        if lastMessage.content != "I'm having trouble right now. Please try again later." {
+                            user.xp += 10 // Award XP for each meaningful interaction
                         }
-                    }
-                }
-                .onAppear {
-                    scrollProxy = proxy
-                    if let lastMessage = moneybotService.messages.last {
-                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
                     }
                 }
             }
             
-            // Bottom input area
-            VStack(spacing: 0) {
-                Divider()
-                HStack {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.gray.opacity(0.1))
-                        
-                        TextField("Ask Moneybot something...", text: $newMessage)
-                            .padding(.horizontal, 16)
-                            .frame(height: 40)
-                            .focused($isInputFocused)
-                            .submitLabel(.send)
-                            .onSubmit {
-                                sendMessage()
-                            }
-                    }
-                    .frame(height: 40)
-                    
-                    Button(action: sendMessage) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .resizable()
-                            .frame(width: 30, height: 30)
-                            .foregroundColor(.green)
-                    }
-                    .disabled(newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || moneybotService.isLoading)
-                    .opacity((newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || moneybotService.isLoading) ? 0.5 : 1.0)
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
+            if showingSuggestions {
+                suggestionView
             }
-            .background(Color.white)
+            
+            inputBar
         }
-        .navigationTitle("Money Co-Pilot")
+        .background(Color(.systemGray6))
+        .navigationTitle("MoneyBot Chat")
         .navigationBarTitleDisplayMode(.inline)
-        .background(Color.white.edgesIgnoringSafeArea(.all))
+        .onAppear {
+            user.chatInteractions += 1
+            
+            // Check for earned achievements
+            if user.chatInteractions == 1 {
+                user.achievements.append(Achievement(
+                    title: "First Chat",
+                    description: "Started your first conversation with Moneybot",
+                    icon: "message.fill",
+                    xpValue: 50
+                ))
+                user.xp += 50
+            } else if user.chatInteractions == 5 {
+                user.achievements.append(Achievement(
+                    title: "Curious Mind",
+                    description: "Had 5 conversations with Moneybot",
+                    icon: "lightbulb.fill",
+                    xpValue: 100
+                ))
+                user.xp += 100
+            }
+        }
+    }
+    
+    private var suggestionView: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(suggestionQuestions, id: \.self) { question in
+                    Button(action: {
+                        messageText = question
+                        sendMessage()
+                    }) {
+                        Text(question)
+                            .font(.system(size: 14))
+                            .foregroundColor(.primary)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color(.systemGray5))
+                            )
+                    }
+                }
+            }
+            .padding(.horizontal)
+            .padding(.top, 8)
+        }
+        .padding(.vertical, 8)
+        .background(Color(.systemGray6))
+    }
+    
+    private var inputBar: some View {
+        HStack(alignment: .center, spacing: 10) {
+            Button(action: {
+                withAnimation {
+                    showingSuggestions.toggle()
+                }
+            }) {
+                Image(systemName: showingSuggestions ? "chevron.down" : "lightbulb")
+                    .font(.system(size: 20))
+                    .foregroundColor(.green)
+                    .padding(8)
+                    .background(Circle().fill(Color(.systemGray5)))
+            }
+            
+            TextField("Ask Moneybot...", text: $messageText)
+                .padding(12)
+                .background(Color(.systemGray5))
+                .cornerRadius(20)
+                .submitLabel(.send)
+                .onSubmit {
+                    sendMessage()
+                }
+            
+            Button(action: sendMessage) {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.system(size: 30))
+                    .foregroundColor(messageText.isEmpty ? Color(.systemGray3) : .green)
+            }
+            .disabled(messageText.isEmpty || moneybotService.isLoading)
+        }
+        .padding()
+        .background(Color(.systemGray6))
     }
     
     private func sendMessage() {
-        let trimmedMessage = newMessage.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedMessage.isEmpty && !moneybotService.isLoading else { return }
+        guard !messageText.isEmpty, !moneybotService.isLoading else { return }
         
-        let messageToSend = trimmedMessage
-        newMessage = ""
+        let message = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
+        messageText = ""
+        moneybotService.sendMessage(message)
         
-        // Hide keyboard after sending
-        isInputFocused = false
-        
-        // Send message to service
-        moneybotService.sendMessage(messageToSend) { result in
-            // Handle any errors if needed
-            if case .failure(let error) = result {
-                print("Error communicating with Moneybot AI: \(error)")
-            }
+        // Hide suggestions after sending a message
+        withAnimation {
+            showingSuggestions = false
         }
     }
 }
@@ -143,121 +173,63 @@ struct MoneybotChatView: View {
 struct MessageBubble: View {
     let message: ChatMessage
     
+    private var isUser: Bool {
+        message.role == .user
+    }
+    
     var body: some View {
         HStack {
-            if message.role == .user {
-                Spacer()
+            if isUser { Spacer() }
+            
+            VStack(alignment: isUser ? .trailing : .leading, spacing: 4) {
+                Text(message.role.displayName)
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .padding(.horizontal, 4)
                 
                 Text(message.content)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(Color.green.opacity(0.2))
-                    .foregroundColor(.black)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.green.opacity(0.1), lineWidth: 1)
+                    .padding(12)
+                    .background(
+                        isUser ?
+                        LinearGradient(
+                            colors: [.green, Color.green.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ) :
+                        LinearGradient(
+                            colors: [Color(.systemGray5), Color(.systemGray4)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                    .frame(maxWidth: 280, alignment: .trailing)
-            } else {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(alignment: .bottom, spacing: 8) {
-                        // Bot avatar
-                        Image("new-moneybot-logo")
-                            .resizable()
-                            .frame(width: 28, height: 28)
-                            .clipShape(Circle())
-                        
-                        Text(message.content)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color.gray.opacity(0.1))
-                            .foregroundColor(.black)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                            )
-                            .frame(maxWidth: 280, alignment: .leading)
-                    }
-                    
-                    // Timestamp below bot message
-                    Text(formatTimestamp(message.timestamp))
-                        .font(.system(size: 10))
-                        .foregroundColor(.gray)
-                        .padding(.leading, 36)
-                }
-                
-                Spacer()
+                    .foregroundColor(isUser ? .white : .primary)
+                    .cornerRadius(18)
             }
-        }
-        .transition(.opacity.combined(with: .scale(scale: 0.95)))
-    }
-    
-    private func formatTimestamp(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
-    }
-}
-
-struct BotTypingIndicator: View {
-    @State private var offsetOne: CGFloat = 0
-    @State private var offsetTwo: CGFloat = 0
-    @State private var offsetThree: CGFloat = 0
-    
-    var body: some View {
-        HStack(spacing: 8) {
-            // Bot avatar
-            Image("new-moneybot-logo")
-                .resizable()
-                .frame(width: 28, height: 28)
-                .clipShape(Circle())
+            .padding(.horizontal)
             
-            // Typing indicator
-            HStack(spacing: 5) {
-                Circle()
-                    .fill(Color.gray.opacity(0.6))
-                    .frame(width: 6, height: 6)
-                    .offset(y: offsetOne)
-                Circle()
-                    .fill(Color.gray.opacity(0.6))
-                    .frame(width: 6, height: 6)
-                    .offset(y: offsetTwo)
-                Circle()
-                    .fill(Color.gray.opacity(0.6))
-                    .frame(width: 6, height: 6)
-                    .offset(y: offsetThree)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(Color.gray.opacity(0.1))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-            )
-        }
-        .onAppear {
-            withAnimation(Animation.easeInOut(duration: 0.5).repeatForever()) {
-                offsetOne = -5
-            }
-            
-            withAnimation(Animation.easeInOut(duration: 0.5).repeatForever().delay(0.2)) {
-                offsetTwo = -5
-            }
-            
-            withAnimation(Animation.easeInOut(duration: 0.5).repeatForever().delay(0.4)) {
-                offsetThree = -5
-            }
+            if !isUser { Spacer() }
         }
     }
 }
 
-struct MoneybotChatView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            MoneybotChatView()
-        }
+struct Achievement {
+    var id = UUID()
+    var title: String
+    var description: String
+    var icon: String
+    var xpValue: Int
+    var dateEarned: Date = Date()
+}
+
+extension User {
+    // These would typically be in the User model, but adding for illustration
+    var chatInteractions: Int {
+        get { UserDefaults.standard.integer(forKey: "chatInteractions") }
+        set { UserDefaults.standard.set(newValue, forKey: "chatInteractions") }
+    }
+    
+    mutating func addAchievement(_ achievement: Achievement) {
+        achievements.append(achievement)
+        xp += achievement.xpValue
     }
 }
