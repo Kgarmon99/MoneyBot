@@ -1,209 +1,142 @@
 import SwiftUI
 
 struct MoneybotChatView: View {
-    @StateObject private var service = MoneybotService()
-    @State private var messageText = ""
-    @State private var showingSuggestions = true
-    @Binding var user: User
-    @State private var isCalculatorShowing = false
-    @State private var calculatorType: CalculatorType = .compound
+    @StateObject private var moneybotService = MoneybotService.shared
+    @State private var newMessage = ""
+    @State private var scrollProxy: ScrollViewProxy? = nil
+    @FocusState private var isInputFocused: Bool
     
-    enum CalculatorType {
-        case compound
-        case savings
-    }
+    // Colors for chat bubbles
+    private let userBubbleColor = Color.green.opacity(0.2)
+    private let botBubbleColor = Color.gray.opacity(0.1)
     
     var body: some View {
         VStack(spacing: 0) {
+            // Header with logo and title
+            HStack {
+                Image("new-moneybot-logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 30)
+                
+                Text("Moneybot Co-Pilot")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Button(action: {
+                    moneybotService.clearChat()
+                }) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 16))
+                        .foregroundColor(.gray)
+                }
+                .padding(8)
+                .background(Color.gray.opacity(0.1))
+                .clipShape(Circle())
+            }
+            .padding()
+            .background(Color.white)
+            .shadow(color: Color.black.opacity(0.05), radius: 5, y: 5)
+            
             // Chat messages
-            ScrollViewReader { scrollView in
+            ScrollViewReader { proxy in
                 ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(service.messages.filter { $0.role != .system }) { message in
+                    LazyVStack(spacing: 12) {
+                        ForEach(moneybotService.messages) { message in
                             MessageBubble(message: message)
                                 .id(message.id)
                         }
                         
-                        // Loading indicator
-                        if service.isLoading {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .green))
-                                .scaleEffect(1.2)
-                                .padding()
-                                .frame(maxWidth: .infinity, alignment: .center)
+                        // Ghost bubble for when bot is typing
+                        if moneybotService.isLoading {
+                            HStack {
+                                BotTypingIndicator()
+                                Spacer()
+                            }
+                            .id("loadingIndicator")
                         }
                     }
                     .padding()
                 }
-                .onChange(of: service.messages.count) { _ in
+                .onChange(of: moneybotService.messages.count) { _ in
                     withAnimation {
-                        if let lastMessage = service.messages.last(where: { $0.role != .system }) {
-                            scrollView.scrollTo(lastMessage.id, anchor: .bottom)
+                        if let lastMessage = moneybotService.messages.last {
+                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
                         }
                     }
-                    
-                    // Award XP for meaningful interactions
-                    if let lastMessage = service.messages.last, 
-                       lastMessage.role == .assistant,
-                       !lastMessage.content.contains("technical difficulties") {
-                        user.xp += 10
+                }
+                .onChange(of: moneybotService.isLoading) { isLoading in
+                    if isLoading {
+                        withAnimation {
+                            proxy.scrollTo("loadingIndicator", anchor: .bottom)
+                        }
                     }
                 }
-                .background(Color(.systemGroupedBackground))
+                .onAppear {
+                    scrollProxy = proxy
+                    if let lastMessage = moneybotService.messages.last {
+                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                    }
+                }
             }
             
-            // Suggested follow-ups
-            if showingSuggestions && !service.suggestedFollowUps.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(service.suggestedFollowUps, id: \.self) { question in
-                            Button(action: {
-                                messageText = question
+            // Bottom input area
+            VStack(spacing: 0) {
+                Divider()
+                HStack {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.gray.opacity(0.1))
+                        
+                        TextField("Ask Moneybot something...", text: $newMessage)
+                            .padding(.horizontal, 16)
+                            .frame(height: 40)
+                            .focused($isInputFocused)
+                            .submitLabel(.send)
+                            .onSubmit {
                                 sendMessage()
-                            }) {
-                                Text(question)
-                                    .font(.subheadline)
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 8)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .fill(Color(.systemGray5))
-                                    )
-                                    .foregroundColor(.primary)
                             }
-                        }
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 12)
-                    .padding(.bottom, 8)
-                }
-                .background(Color(.systemGray6))
-            }
-            
-            // Calculator tools
-            if isCalculatorShowing {
-                VStack(spacing: 12) {
-                    HStack {
-                        Text("Financial Calculator")
-                            .font(.headline)
-                        
-                        Spacer()
-                        
-                        Button(action: {
-                            withAnimation {
-                                isCalculatorShowing = false
-                            }
-                        }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.gray)
-                        }
-                    }
+                    .frame(height: 40)
                     
-                    Picker("Calculator Type", selection: $calculatorType) {
-                        Text("Compound Interest").tag(CalculatorType.compound)
-                        Text("Savings Goal").tag(CalculatorType.savings)
+                    Button(action: sendMessage) {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .foregroundColor(.green)
                     }
-                    .pickerStyle(SegmentedPickerStyle())
-                    
-                    if calculatorType == .compound {
-                        CompoundInterestCalculator(service: service)
-                    } else {
-                        SavingsGoalCalculator(service: service)
-                    }
+                    .disabled(newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || moneybotService.isLoading)
+                    .opacity((newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || moneybotService.isLoading) ? 0.5 : 1.0)
                 }
-                .padding()
-                .background(Color(.systemGray6))
+                .padding(.horizontal)
+                .padding(.vertical, 8)
             }
-            
-            // Message input
-            messageInputView
+            .background(Color.white)
         }
-        .onAppear {
-            // Track usage in user stats
-            if user.chatSessions == nil {
-                user.chatSessions = 1
-            } else {
-                user.chatSessions! += 1
-            }
-            
-            // Check for achievement
-            if user.chatSessions == 1 {
-                let achievement = Achievement(
-                    title: "First Chat",
-                    description: "Started your first conversation with Moneybot",
-                    icon: "message.circle.fill",
-                    unlocked: true
-                )
-                
-                if !user.achievements.contains(where: { $0.title == achievement.title }) {
-                    user.achievements.append(achievement)
-                    user.xp += 50
-                }
-            }
-        }
-    }
-    
-    private var messageInputView: some View {
-        HStack(alignment: .bottom, spacing: 10) {
-            Button(action: {
-                withAnimation {
-                    showingSuggestions.toggle()
-                }
-            }) {
-                Image(systemName: showingSuggestions ? "chevron.down" : "lightbulb")
-                    .font(.system(size: 20))
-                    .foregroundColor(.green)
-                    .padding(8)
-                    .background(
-                        Circle()
-                            .fill(Color(.systemGray5))
-                    )
-            }
-            
-            Button(action: {
-                withAnimation {
-                    isCalculatorShowing.toggle()
-                }
-            }) {
-                Image(systemName: "function")
-                    .font(.system(size: 20))
-                    .foregroundColor(.green)
-                    .padding(8)
-                    .background(
-                        Circle()
-                            .fill(Color(.systemGray5))
-                    )
-            }
-            
-            TextField("Ask Moneybot...", text: $messageText)
-                .padding(12)
-                .background(Color(.systemGray5))
-                .cornerRadius(20)
-                .submitLabel(.send)
-                .onSubmit(sendMessage)
-            
-            Button(action: sendMessage) {
-                Image(systemName: "arrow.up.circle.fill")
-                    .font(.system(size: 32))
-                    .foregroundColor(messageText.isEmpty ? Color(.systemGray3) : .green)
-            }
-            .disabled(messageText.isEmpty || service.isLoading)
-        }
-        .padding()
-        .background(Color(.systemGray6))
+        .navigationTitle("Money Co-Pilot")
+        .navigationBarTitleDisplayMode(.inline)
+        .background(Color.white.edgesIgnoringSafeArea(.all))
     }
     
     private func sendMessage() {
-        guard !messageText.isEmpty, !service.isLoading else { return }
+        let trimmedMessage = newMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedMessage.isEmpty && !moneybotService.isLoading else { return }
         
-        let text = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
-        messageText = ""
+        let messageToSend = trimmedMessage
+        newMessage = ""
         
-        withAnimation {
-            showingSuggestions = false
+        // Hide keyboard after sending
+        isInputFocused = false
+        
+        // Send message to service
+        moneybotService.sendMessage(messageToSend) { result in
+            // Handle any errors if needed
+            if case .failure(let error) = result {
+                print("Error communicating with Moneybot AI: \(error)")
+            }
         }
-        
-        service.sendMessage(text)
     }
 }
 
@@ -214,169 +147,117 @@ struct MessageBubble: View {
         HStack {
             if message.role == .user {
                 Spacer()
-            }
-            
-            VStack(alignment: message.role == .user ? .trailing : .leading, spacing: 2) {
-                Text(message.role.displayName)
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .padding(.horizontal, 4)
                 
                 Text(message.content)
-                    .padding(.horizontal, 14)
+                    .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(
-                        message.role == .user ?
-                            LinearGradient(
-                                gradient: Gradient(colors: [.green, Color.green.opacity(0.8)]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ) :
-                            Color(.systemGray5)
+                    .background(Color.green.opacity(0.2))
+                    .foregroundColor(.black)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.green.opacity(0.1), lineWidth: 1)
                     )
-                    .foregroundColor(message.role == .user ? .white : .primary)
-                    .cornerRadius(18)
-            }
-            
-            if message.role == .assistant {
+                    .frame(maxWidth: 280, alignment: .trailing)
+            } else {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .bottom, spacing: 8) {
+                        // Bot avatar
+                        Image("new-moneybot-logo")
+                            .resizable()
+                            .frame(width: 28, height: 28)
+                            .clipShape(Circle())
+                        
+                        Text(message.content)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color.gray.opacity(0.1))
+                            .foregroundColor(.black)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                            )
+                            .frame(maxWidth: 280, alignment: .leading)
+                    }
+                    
+                    // Timestamp below bot message
+                    Text(formatTimestamp(message.timestamp))
+                        .font(.system(size: 10))
+                        .foregroundColor(.gray)
+                        .padding(.leading, 36)
+                }
+                
                 Spacer()
             }
         }
+        .transition(.opacity.combined(with: .scale(scale: 0.95)))
+    }
+    
+    private func formatTimestamp(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }
 
-struct CompoundInterestCalculator: View {
-    let service: MoneybotService
-    @State private var principal: String = "1000"
-    @State private var rate: String = "7"
-    @State private var years: String = "10"
-    @State private var monthlyContribution: String = "0"
+struct BotTypingIndicator: View {
+    @State private var offsetOne: CGFloat = 0
+    @State private var offsetTwo: CGFloat = 0
+    @State private var offsetThree: CGFloat = 0
     
     var body: some View {
-        VStack(spacing: 10) {
-            HStack {
-                Text("Initial amount:")
-                TextField("$", text: $principal)
-                    .keyboardType(.decimalPad)
-                    .padding(8)
-                    .background(Color(.systemGray5))
-                    .cornerRadius(8)
-            }
+        HStack(spacing: 8) {
+            // Bot avatar
+            Image("new-moneybot-logo")
+                .resizable()
+                .frame(width: 28, height: 28)
+                .clipShape(Circle())
             
-            HStack {
-                Text("Interest rate (%):")
-                TextField("%", text: $rate)
-                    .keyboardType(.decimalPad)
-                    .padding(8)
-                    .background(Color(.systemGray5))
-                    .cornerRadius(8)
+            // Typing indicator
+            HStack(spacing: 5) {
+                Circle()
+                    .fill(Color.gray.opacity(0.6))
+                    .frame(width: 6, height: 6)
+                    .offset(y: offsetOne)
+                Circle()
+                    .fill(Color.gray.opacity(0.6))
+                    .frame(width: 6, height: 6)
+                    .offset(y: offsetTwo)
+                Circle()
+                    .fill(Color.gray.opacity(0.6))
+                    .frame(width: 6, height: 6)
+                    .offset(y: offsetThree)
             }
-            
-            HStack {
-                Text("Years:")
-                TextField("years", text: $years)
-                    .keyboardType(.numberPad)
-                    .padding(8)
-                    .background(Color(.systemGray5))
-                    .cornerRadius(8)
-            }
-            
-            HStack {
-                Text("Monthly add:")
-                TextField("$", text: $monthlyContribution)
-                    .keyboardType(.decimalPad)
-                    .padding(8)
-                    .background(Color(.systemGray5))
-                    .cornerRadius(8)
-            }
-            
-            Button(action: calculateAndSend) {
-                Text("Calculate")
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 8)
-                    .background(Color.green)
-                    .cornerRadius(12)
-            }
-            .padding(.top, 8)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(Color.gray.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+            )
         }
-    }
-    
-    private func calculateAndSend() {
-        let principalValue = Double(principal) ?? 1000
-        let rateValue = Double(rate) ?? 7
-        let yearsValue = Int(years) ?? 10
-        let monthlyValue = Double(monthlyContribution) ?? 0
-        
-        let result = service.calculateCompoundInterest(
-            principal: principalValue,
-            rate: rateValue,
-            years: yearsValue,
-            monthlyContribution: monthlyValue
-        )
-        
-        service.sendMessage("Calculate compound interest with principal $\(principal), rate \(rate)%, time \(years) years, and monthly contribution $\(monthlyContribution)")
+        .onAppear {
+            withAnimation(Animation.easeInOut(duration: 0.5).repeatForever()) {
+                offsetOne = -5
+            }
+            
+            withAnimation(Animation.easeInOut(duration: 0.5).repeatForever().delay(0.2)) {
+                offsetTwo = -5
+            }
+            
+            withAnimation(Animation.easeInOut(duration: 0.5).repeatForever().delay(0.4)) {
+                offsetThree = -5
+            }
+        }
     }
 }
 
-struct SavingsGoalCalculator: View {
-    let service: MoneybotService
-    @State private var goal: String = "10000"
-    @State private var months: String = "24"
-    
-    var body: some View {
-        VStack(spacing: 10) {
-            HStack {
-                Text("Goal amount:")
-                TextField("$", text: $goal)
-                    .keyboardType(.decimalPad)
-                    .padding(8)
-                    .background(Color(.systemGray5))
-                    .cornerRadius(8)
-            }
-            
-            HStack {
-                Text("Months to goal:")
-                TextField("months", text: $months)
-                    .keyboardType(.numberPad)
-                    .padding(8)
-                    .background(Color(.systemGray5))
-                    .cornerRadius(8)
-            }
-            
-            Button(action: calculateAndSend) {
-                Text("Calculate")
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 8)
-                    .background(Color.green)
-                    .cornerRadius(12)
-            }
-            .padding(.top, 8)
-        }
-    }
-    
-    private func calculateAndSend() {
-        let goalValue = Double(goal) ?? 10000
-        let monthsValue = Int(months) ?? 24
-        
-        let result = service.generateSavingsPlan(
-            goal: goalValue,
-            timeframe: monthsValue
-        )
-        
-        service.sendMessage("I want to save $\(goal) in \(months) months. What's my savings plan?")
-    }
-}
-
-// Extended User model with chat tracking
-extension User {
-    var chatSessions: Int? {
-        get { UserDefaults.standard.integer(forKey: "userChatSessions") }
-        set { 
-            if let value = newValue {
-                UserDefaults.standard.set(value, forKey: "userChatSessions")
-            }
+struct MoneybotChatView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationView {
+            MoneybotChatView()
         }
     }
 }

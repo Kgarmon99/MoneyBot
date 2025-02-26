@@ -1,3 +1,4 @@
+
 import SwiftUI
 
 struct LearnView: View {
@@ -14,7 +15,6 @@ struct LearnView: View {
         case audio
         case quotes
         case tips
-        case moneybot
     }
     
     let audioContent = [
@@ -58,8 +58,11 @@ struct LearnView: View {
     var currentContent: some View {
         Group {
             switch contentType {
-            case .moneybot:
-                MoneybotChatView(user: $user)
+            case .tips:
+                VStack {
+                    TipCard(tip: tips[currentTipIndex % tips.count])
+                    NavigationControls(currentIndex: $currentTipIndex, totalItems: tips.count)
+                }
             case .quotes:
                 VStack {
                     QuoteCard(quote: quotes[currentTipIndex % quotes.count])
@@ -147,7 +150,6 @@ struct LearnView: View {
                     Text("Audio").tag(ContentType.audio)
                     Text("Quotes").tag(ContentType.quotes)
                     Text("Tips").tag(ContentType.tips)
-                    Text("Moneybot").tag(ContentType.moneybot)
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal)
@@ -377,3 +379,6 @@ struct NavigationControls: View {
         .padding()
     }
 }
+
+
+
